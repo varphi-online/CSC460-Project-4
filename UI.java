@@ -1,15 +1,15 @@
 import java.util.ArrayList;
 
 public class UI {
-    private Mode initial;
+    private Menu initial;
 
     public UI(){}
 
-    public UI(Mode initialMode){
+    public UI(Menu initialMode){
         initial = initialMode;
     }
 
-    public void setInitialMode(Mode mode){
+    public void setInitialMode(Menu mode){
         initial = mode;
     }
 

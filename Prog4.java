@@ -3,37 +3,37 @@ public class Prog4 {
         UI ui = new UI();
 
         ui.setInitialMode(
-            new Mode("Home", ()->{System.out.println("Welcome to El Jefe Cat Cafe!");}).addSubMode(new Mode[] {
-                new Mode("Customer Login", ()->{/**TODO: Login and set progctx*/ System.out.println("hi");}).addSubMode(new Mode[] {
-                    new Mode("Food Orders").addSubMode(new Mode[] {
-                        new Mode("New Order", ()->{/**TODO: food and bev sep modes?*/}),
-                        new Mode("Update Order", ()->{/**TODO: */}),
-                        new Mode("Delete Order (Mistake!)", ()->{/**TODO: */})
+            new Menu("Home", ()->{System.out.println("Welcome to El Jefe Cat Cafe!");}).addSubMenu(new Menu[] {
+                new Menu("Customer Login", ()->{/**TODO: Login and set progctx*/ System.out.println("hi");}).addSubMenu(new Menu[] {
+                    new Menu("Food Orders").addSubMenu(new Menu[] {
+                        new Menu("New Order", ()->{/**TODO: food and bev sep modes?*/}),
+                        new Menu("Update Order", ()->{/**TODO: */}),
+                        new Menu("Delete Order (Mistake!)", ()->{/**TODO: */})
                     }),
-                    new Mode("Manage Reservations").addSubMode(new Mode[] {
-                        new Mode("Book a Reservation", ()->{/**TODO: */}),
-                        new Mode("Remove a Reservation", ()->{/**TODO: following is an example*/ 
+                    new Menu("Manage Reservations").addSubMenu(new Menu[] {
+                        new Menu("Book a Reservation", ()->{/**TODO: */}),
+                        new Menu("Remove a Reservation", ()->{/**TODO: following is an example*/ 
                             ProgramContext.setStatusMessage("Reservation removed!",ProgramContext.Color.GREEN);}),
-                        new Mode("Update a Reservation").addSubMode(new Mode[] {
-                            new Mode("Reschedule", ()->{/**TODO: */}),
-                            new Mode("Extend Duration", ()->{/**TODO: */})
+                        new Menu("Update a Reservation").addSubMenu(new Menu[] {
+                            new Menu("Reschedule", ()->{/**TODO: */}),
+                            new Menu("Extend Duration", ()->{/**TODO: */})
                         }),
-                        new Mode("Check In", ()->{/**TODO: */}),
-                        new Mode("Check Out", ()->{/**TODO: */})
+                        new Menu("Check In", ()->{/**TODO: */}),
+                        new Menu("Check Out", ()->{/**TODO: */})
                     }),
-                    new Mode("Manage Events").addSubMode(new Mode[] {
-                        new Mode("Show Registered Events", ()->{/**TODO: */}),
-                        new Mode("Register for Event", ()->{/**TODO: */}),
+                    new Menu("Manage Events").addSubMenu(new Menu[] {
+                        new Menu("Show Registered Events", ()->{/**TODO: */}),
+                        new Menu("Register for Event", ()->{/**TODO: */}),
                     }),
-                    new Mode("Edit Profile").addSubMode(new Mode[] {
-                        new Mode("Change Membership Tier.", ()->{/**TODO: */}),
-                        new Mode("Change Phone #", ()->{/**TODO: */}),
-                        new Mode("Change e-Mail", ()->{/**TODO: */}),
-                        new Mode("Book a Emergency Contact", ()->{/**TODO: */}),
+                    new Menu("Edit Profile").addSubMenu(new Menu[] {
+                        new Menu("Change Membership Tier.", ()->{/**TODO: */}),
+                        new Menu("Change Phone #", ()->{/**TODO: */}),
+                        new Menu("Change e-Mail", ()->{/**TODO: */}),
+                        new Menu("Book a Emergency Contact", ()->{/**TODO: */}),
                     }),
                 }),
-                new Mode("Customer Registration", ()->{/**TODO:*/}),
-                new Mode("Staff Dashboard")
+                new Menu("Customer Registration", ()->{/**TODO:*/}),
+                new Menu("Staff Dashboard")
             })
         );
 

@@ -1,43 +1,43 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Mode {
+public class Menu {
     final private String name;
-    final private ArrayList<Mode> submodes = new ArrayList<>();
+    final private ArrayList<Menu> submenus = new ArrayList<>();
     private Runnable callback;
     private static final Scanner scanner = new Scanner(System.in);
 
-    public Mode(String modeName) {
-        name = modeName;
+    public Menu(String menuName) {
+        name = menuName;
     }
 
-    public Mode(String modeName, Runnable cb) {
-        name = modeName;
+    public Menu(String menuName, Runnable cb) {
+        name = menuName;
         callback = cb;
     }
 
-    public Mode addSubMode(Mode submode) {
-        submodes.add(submode);
+    public Menu addSubMenu(Menu sumMenu) {
+        submenus.add(sumMenu);
         return this;
     }
 
-    public Mode addSubMode(Mode[] all) {
-        for (Mode submode : all) {
-            submodes.add(submode);
+    public Menu addSubMenu(Menu[] all) {
+        for (Menu sumMenu : all) {
+            submenus.add(sumMenu);
         }
         return this;
     }
 
-    public Mode addSubMode(String newname) {
-        Mode newMode = new Mode(newname);
-        submodes.add(newMode);
-        return newMode;
+    public Menu addSubMenu(String newname) {
+        Menu newMenu = new Menu(newname);
+        submenus.add(newMenu);
+        return newMenu;
     }
 
-    public Mode addSubMode(String newname, Runnable cb) {
-        Mode newMode = new Mode(newname, cb);
-        submodes.add(newMode);
-        return newMode;
+    public Menu addSubMenu(String newname, Runnable cb) {
+        Menu newMenu = new Menu(newname, cb);
+        submenus.add(newMenu);
+        return newMenu;
     }
 
     public void setCallback(Runnable cb) {
@@ -48,10 +48,10 @@ public class Mode {
         return name;
     }
 
-    public void listModes() {
+    public void listMenus() {
         System.out.println("\n 0. ↶ Back");
-        for (int i = 0; i < submodes.size(); i++) {
-            System.out.printf("%2d. %s%n", i + 1, submodes.get(i).getName());
+        for (int i = 0; i < submenus.size(); i++) {
+            System.out.printf("%2d. %s%n", i + 1, submenus.get(i).getName());
         }
     }
 
@@ -69,12 +69,12 @@ public class Mode {
             if (callback != null)
                 callback.run();
             
-            if (submodes.size() == 0) return;
+            if (submenus.size() == 0) return;
             
             
             //TODO: print current user info?
             
-            listModes();
+            listMenus();
             String msg = ProgramContext.getStatusMessage();
             if (msg != null) {
                 System.out.println("\n"+msg);
@@ -97,8 +97,8 @@ public class Mode {
                     return;
                 }
 
-                if (choice > 0 && choice <= submodes.size()) {
-                    submodes.get(choice - 1).capture(); // child
+                if (choice > 0 && choice <= submenus.size()) {
+                    submenus.get(choice - 1).capture(); // child
                     ProgramContext.popBreadcrumb();
                 } else {
                     ProgramContext.setStatusMessage("Invalid selection.",
