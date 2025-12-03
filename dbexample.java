@@ -32,7 +32,7 @@ import java.sql.*; // For access to the SQL interaction methods
 import java.util.Calendar;
 import java.util.Scanner;
 
-public class Prog3 {
+public class DBExample {
     final static int[] years = { 2012, 2016, 2020, 2024 };
 
     public static void main(String[] args) {

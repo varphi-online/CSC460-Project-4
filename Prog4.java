@@ -1,5 +1,11 @@
+import java.sql.SQLException;
+import java.util.Scanner;
+
 public class Prog4 {
-    public static void main(String[] args) {
+    private static final Scanner scanner = new Scanner(System.in);
+    public static Scanner getScanner(){return scanner;}
+    public static void main(String[] args) throws SQLException {
+        DB.init(args);
         UI ui = new UI();
 
         // DO NOT PROGRAM THE CALLBACKS INLINE, USE THEM TO RUN OTHER CLASSES
@@ -20,8 +26,7 @@ public class Prog4 {
             new Menu("Home", ()->{System.out.println("Welcome to El Jefe Cat Cafe!");}).addSubMenu(new Menu[] {
                 new Menu("Customer Registration", ()->{/**TODO: Req 1 (Insert)*/}),
                 new Menu("Our Pets", ()->{/**TODO: Public pet list*/}), 
-                
-                new Menu("Customer Dashboard", ()->{/**TODO: Login*/}).addSubMenu(new Menu[] {
+                new Menu("Customer Dashboard", ()->login(false)).addSubMenu(new Menu[] {
                     new Menu("View Visit History", ()->{/**TODO: QUERY 2 GOES HERE (Complex History)*/}),
                     new Menu("Food Orders").addSubMenu(new Menu[] {
                         new Menu("New Order", ()->{/**TODO: Req 3 (Insert)*/}),
@@ -54,7 +59,7 @@ public class Prog4 {
                         new Menu("Delete Account", ()->{/**TODO: Req 1 (Delete - w/ logic checks)*/}),
                     }),
                 }),
-                new Menu("Staff Dashboard", ()->{/**TODO: Staff login*/}).addSubMenu(new Menu[] {
+                new Menu("Staff Dashboard", ()->login(true)).addSubMenu(new Menu[] {
                     new Menu("Front Desk Operations").addSubMenu(new Menu[] {
                          new Menu("Check Customer In", ()->{/**TODO: Req 4 (Update status)*/}),
                          new Menu("Check Customer Out", ()->{/**TODO: Req 4 (Update status)*/}),
@@ -93,5 +98,26 @@ public class Prog4 {
             - It must be constructed using at least one piece of information gathered from the user.
         */
         ui.run();
+        DB.db.close();
     }
+
+    public static void login(Boolean staff){
+        // No password auth.
+        if(ProgramContext.getUserId() != null &&
+            (ProgramContext.getType() == ProgramContext.UserType.STAFF && staff) ||
+            (ProgramContext.getType() == ProgramContext.UserType.MEMBER && !staff)) return;
+        System.out.print("Please enter your member id: ");
+        String entered = scanner.nextLine().trim();
+        try {
+            Integer id = Integer.parseInt(entered);
+            // IF DB.execute("SELECT id FROM members WHERE id=?").prepare().set(0,id).exists()
+            ProgramContext.setUserId(id);
+            ProgramContext.setType(staff ? ProgramContext.UserType.STAFF : ProgramContext.UserType.MEMBER);
+            ProgramContext.setStatusMessage("Successfully Logged In!", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+            throw new RuntimeException("Login Failed"); // so we dont descend
+        }
+    }
+
 }

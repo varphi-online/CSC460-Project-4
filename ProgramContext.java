@@ -4,7 +4,7 @@ import java.util.Stack;
 public class ProgramContext {
     // Global state stored in static gulp
     public enum UserType {
-        Staff, Member
+        STAFF, MEMBER
     };
 
     public static Integer userId;

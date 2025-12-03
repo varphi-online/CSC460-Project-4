@@ -1,11 +1,9 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Menu {
     final private String name;
     final private ArrayList<Menu> submenus = new ArrayList<>();
     private Runnable callback;
-    private static final Scanner scanner = new Scanner(System.in);
 
     public Menu(String menuName) {
         name = menuName;
@@ -96,12 +94,16 @@ public class Menu {
             System.out.print(">> "); // prompt
 
             try {
-                String line = scanner.nextLine();
+                String line = Prog4.getScanner().nextLine();
                 if (line.trim().isEmpty())
                     continue; // empty inp
 
                 if (line.trim().equals("exit"))
-                    System.exit(0);
+                    try {
+                        DB.db.close();
+                    } catch (Exception e) {} finally {
+                        System.exit(0);
+                    }
 
                 int choice = Integer.parseInt(line);
 
@@ -110,8 +112,13 @@ public class Menu {
                 }
 
                 if (choice > 0 && choice <= submenus.size()) {
-                    submenus.get(choice - 1).capture(); // child
-                    ProgramContext.popBreadcrumb();
+                    try {
+                        submenus.get(choice - 1).capture(); // child
+                        ProgramContext.popBreadcrumb();
+                    } catch (Exception e) {
+                        ProgramContext.popBreadcrumb();
+                        continue;
+                    }
                 } else {
                     ProgramContext.setStatusMessage("Invalid selection.",
                             ProgramContext.Color.RED);
