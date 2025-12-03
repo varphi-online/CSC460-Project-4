@@ -51,7 +51,8 @@ public class Menu {
     public void listMenus() {
         System.out.println("\n 0. ↶ Back");
         for (int i = 0; i < submenus.size(); i++) {
-            System.out.printf("%2d. %s%n", i + 1, submenus.get(i).getName());
+            System.out.printf("%2d. %s%s%n", i + 1, submenus.get(i).getName(),
+                    submenus.get(i).submenus.isEmpty() ? "" : " ▷");
         }
     }
 
@@ -60,36 +61,47 @@ public class Menu {
         ProgramContext.pushBreadcrumb(name);
         System.out.print("\033[2J\033[H");
 
-        // maybe optional bool for inside/outside loop?
+        if (submenus.isEmpty()) { // "leaf" no submenus so just call callback
+            System.out.print("\033[2J\033[H"); // Clear
+            String bc = ProgramContext.getBreadcrumb();
+            System.out.println(bc + " │\n" + "─".repeat(bc.length() + 1) + "╯");
+            if (callback != null) {
+                callback.run();
+            }
+            // System.out.println("\n(Press Enter to continue...)");
+            // scanner.nextLine();
+            return; // Return to prev
+        }
 
         while (true) {
             System.out.print("\033[2J\033[H"); // Clear screen
             String bc = ProgramContext.getBreadcrumb();
-            System.out.println(bc + " │\n" + "─".repeat(bc.length()+1) + "╯");
-            if (callback != null)
+            System.out.println(bc + " │\n" + "─".repeat(bc.length() + 1) + "╯");
+            if (callback != null) // use for headers and stuff
                 callback.run();
-            
-            if (submenus.size() == 0) return;
-            
-            
-            //TODO: print current user info?
-            
+
+            if (submenus.size() == 0)
+                return;
+
+            // TODO: print current user info?
+
             listMenus();
             String msg = ProgramContext.getStatusMessage();
             if (msg != null) {
-                System.out.println("\n"+msg);
+                System.out.println("\n" + msg);
                 ProgramContext.clearStatusMessage();
             } else {
                 System.out.println("\n");
             }
             System.out.print(">> "); // prompt
-            
+
             try {
                 String line = scanner.nextLine();
                 if (line.trim().isEmpty())
                     continue; // empty inp
 
-                if(line.trim().equals("exit")) System.exit(0);
+                if (line.trim().equals("exit"))
+                    System.exit(0);
 
                 int choice = Integer.parseInt(line);
 
@@ -102,14 +114,14 @@ public class Menu {
                     ProgramContext.popBreadcrumb();
                 } else {
                     ProgramContext.setStatusMessage("Invalid selection.",
-                        ProgramContext.Color.RED);
+                            ProgramContext.Color.RED);
                 }
             } catch (NumberFormatException e) {
                 ProgramContext.setStatusMessage("Please enter a valid number.",
-                    ProgramContext.Color.RED);
+                        ProgramContext.Color.RED);
             } catch (Exception e) {
                 ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(),
-                    ProgramContext.Color.RED);
+                        ProgramContext.Color.RED);
             }
         }
     }

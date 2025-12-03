@@ -3,17 +3,18 @@ import java.util.ArrayList;
 public class UI {
     private Menu initial;
 
-    public UI(){}
+    public UI() {
+    }
 
-    public UI(Menu initialMode){
+    public UI(Menu initialMode) {
         initial = initialMode;
     }
 
-    public void setInitialMode(Menu mode){
+    public void setInitialMode(Menu mode) {
         initial = mode;
     }
 
-    public void run(){
+    public void run() {
         initial.capture();
     }
 }
