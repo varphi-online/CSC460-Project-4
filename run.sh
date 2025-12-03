@@ -2,4 +2,4 @@
 
 #dev
 make -f Makefile Prog4.class
-java -cp .:h2-2.4.240.jar Prog4
+java -cp .:misc_files/h2-2.4.240.jar Prog4
