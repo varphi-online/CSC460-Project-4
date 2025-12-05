@@ -29,33 +29,34 @@
  */
 
 import java.sql.*;
+import java.util.*;
 
 public class DB {
     public static Connection db = null;
 
     public static void init(String[] args) {
 
-         final String oracleURL = "jdbc:h2:./my_local_db;MODE=Oracle";
-         String username = "sa",
-            password = "";
+        final String oracleURL = "jdbc:h2:./my_local_db;MODE=Oracle";
+        String username = "sa",
+                password = "";
 
-        /* 
-        final String oracleURL = // Magic lectura -> aloe access spell
-                "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
-        String username = null, // Oracle DBMS username
-                password = null; // Oracle DBMS password
-        if (args.length == 2) { // get username/password from cmd line args
-            username = args[0];
-            password = args[1];
-            
-        } else {
-            System.out.println("\nUsage:  java JDBC <username> <password>\n"
-                    + "    where <username> is your Oracle DBMS"
-                    + " username,\n    and <password> is your Oracle"
-                    + " password (not your system password).\n");
-            System.exit(-1);
-        }
-            */
+        /*
+         * final String oracleURL = // Magic lectura -> aloe access spell
+         * "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
+         * String username = null, // Oracle DBMS username
+         * password = null; // Oracle DBMS password
+         * if (args.length == 2) { // get username/password from cmd line args
+         * username = args[0];
+         * password = args[1];
+         * 
+         * } else {
+         * System.out.println("\nUsage:  java JDBC <username> <password>\n"
+         * + "    where <username> is your Oracle DBMS"
+         * + " username,\n    and <password> is your Oracle"
+         * + " password (not your system password).\n");
+         * System.exit(-1);
+         * }
+         */
 
         // load the (Oracle) JDBC driver by initializing its base
         // class, 'oracle.jdbc.OracleDriver'.
@@ -80,5 +81,107 @@ public class DB {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
+    }
+
+    public static ResultSet execute(String query) {
+        try {
+            Statement stmt = db.createStatement();
+            ResultSet result = stmt.executeQuery(query);
+            return result;
+        } catch (SQLException e) {
+            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+        }
+        return null;
+    }
+
+    public static PreparedStatement prepared(String query){
+        try {
+            return db.prepareStatement(query);
+        } catch (SQLException e) {
+            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+        }
+        return null;
+    }
+
+ public static String tabularize(ResultSet rs) {
+        StringBuilder sb = new StringBuilder();
+        
+        try {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnCount = rsmd.getColumnCount();
+            
+            int[] colWidths = new int[columnCount];
+            String[] headers = new String[columnCount];
+            List<String[]> rows = new ArrayList<>();
+
+            for (int i = 0; i < columnCount; i++) {
+                headers[i] = rsmd.getColumnLabel(i + 1);
+                colWidths[i] = headers[i].length();
+            }
+
+            while (rs.next()) {
+                String[] rowData = new String[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    Object obj = rs.getObject(i + 1);
+                    String val = (obj == null) ? "NULL" : obj.toString();
+                    rowData[i] = val;
+
+                    if (val.length() > colWidths[i]) {
+                        colWidths[i] = val.length();
+                    }
+                }
+                rows.add(rowData);
+            }
+
+            String TL = "╭"; String TM = "┬"; String TR = "╮";
+            String ML = "├"; String MM = "┼"; String MR = "┤";
+            String BL = "╰"; String BM = "┴"; String BR = "╯";
+            String V  = "│"; String H  = "─";
+
+            sb.append(TL);
+            for (int i = 0; i < columnCount; i++) {
+                sb.append(H.repeat(colWidths[i] + 2));
+                sb.append(i == columnCount - 1 ? TR : TM);
+            }
+            sb.append("\n");
+
+            sb.append(V);
+            for (int i = 0; i < columnCount; i++) {
+                sb.append(" ").append(padRight(headers[i], colWidths[i])).append(" ").append(V);
+            }
+            sb.append("\n");
+
+            sb.append(ML);
+            for (int i = 0; i < columnCount; i++) {
+                sb.append(H.repeat(colWidths[i] + 2));
+                sb.append(i == columnCount - 1 ? MR : MM);
+            }
+            sb.append("\n");
+
+            for (String[] row : rows) {
+                sb.append(V);
+                for (int i = 0; i < columnCount; i++) {
+                    sb.append(" ").append(padRight(row[i], colWidths[i])).append(" ").append(V);
+                }
+                sb.append("\n");
+            }
+
+            sb.append(BL);
+            for (int i = 0; i < columnCount; i++) {
+                sb.append(H.repeat(colWidths[i] + 2));
+                sb.append(i == columnCount - 1 ? BR : BM);
+            }
+
+        } catch (SQLException e) {
+            // Assuming ProgramContext is defined elsewhere in your project
+            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+            return null;
+        }
+
+        return sb.toString();
+    }
+
+    private static String padRight(String s, int n) {
+        return String.format("%-" + n + "s", s);
     }
 }

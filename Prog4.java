@@ -1,4 +1,4 @@
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Prog4 {
@@ -53,7 +53,7 @@ public class Prog4 {
                         new Menu("Withdraw Application", ()->{/**TODO: Req 6 (Update status to Withdrawn)*/}),
                     }),
                     new Menu("Profile").addSubMenu(new Menu[] {
-                        new Menu("View Personal Details", ()->{/**TODO: Simple SELECT*/}),
+                        new Menu("View Personal Details", ()->{getMemInfo();}),
                         new Menu("Change Membership Tier", ()->{/**TODO: Req 1 (Update)*/}),
                         new Menu("Update Contact Info", ()->{/**TODO: Req 1 (Update)*/}),
                         new Menu("Delete Account", ()->{/**TODO: Req 1 (Delete - w/ logic checks)*/}),
@@ -109,15 +109,40 @@ public class Prog4 {
         System.out.print("Please enter your member id: ");
         String entered = scanner.nextLine().trim();
         try {
-            Integer id = Integer.parseInt(entered);
-            // IF DB.execute("SELECT id FROM members WHERE id=?").prepare().set(0,id).exists()
+            Integer id = Integer.valueOf(entered);
+            var s = DB.prepared(staff ? "SELECT 1 FROM Staff WHERE empId = ?" : "SELECT 1 FROM Member WHERE memberNum = ?");
+            s.setInt(1, id);
+            var rs = s.executeQuery();
+            if (!rs.next()) {
+                ProgramContext.setStatusMessage("Member not found!", ProgramContext.Color.RED);
+                throw new RuntimeException("User does not exist");
+            }
             ProgramContext.setUserId(id);
             ProgramContext.setType(staff ? ProgramContext.UserType.STAFF : ProgramContext.UserType.MEMBER);
             ProgramContext.setStatusMessage("Successfully Logged In!", ProgramContext.Color.GREEN);
-        } catch (Exception e) {
+        } catch (RuntimeException | SQLException e) {
             ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
-            throw new RuntimeException("Login Failed"); // so we dont descend
+            throw new RuntimeException("Login Failed: " + e.getMessage()); // so we dont descend
         }
     }
 
+    public static void getMemInfo() {
+        try {
+            var p = DB.prepared("""
+                        SELECT
+                            memberNum as "ID",
+                            name as "Name",
+                            tele_num as "Telephone #",
+                            email as "e-Mail",
+                            dob as "Birthday",
+                            membershipTier as "Tier"
+                         FROM Member
+                         WHERE memberNum = ?
+                    """);
+            p.setInt(1, ProgramContext.getUserId());
+            System.out.println(DB.tabularize(p.executeQuery()));
+        } catch (SQLException e) {
+            ProgramContext.genericError(e);
+        }
+    }
 }

@@ -1,4 +1,3 @@
-import java.util.HashMap;
 import java.util.Stack;
 
 public class ProgramContext {
@@ -74,5 +73,9 @@ public class ProgramContext {
 
     public static void clearStatusMessage() {
         statusMessage = null;
+    }
+
+    public static void genericError(Exception e){
+        setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
     }
 }

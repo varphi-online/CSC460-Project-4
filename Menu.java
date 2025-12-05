@@ -66,8 +66,8 @@ public class Menu {
             if (callback != null) {
                 callback.run();
             }
-            // System.out.println("\n(Press Enter to continue...)");
-            // scanner.nextLine();
+            System.out.print("\n(Press Enter to continue...)");
+            Prog4.getScanner().nextLine();
             return; // Return to prev
         }
 
