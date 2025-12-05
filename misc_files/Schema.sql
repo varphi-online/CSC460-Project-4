@@ -94,6 +94,17 @@ CREATE TABLE EmergencyContact (
     FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
 );
 
+CREATE TABLE EmergancyContact (
+    emergencyId INTEGER,
+    memberNum INTEGER,
+    name VARCHAR2(255),
+    telNum VARCHAR2(20),
+    email VARCHAR2(255),
+
+    PRIMARY KEY (emergencyId),
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
+);
+
 CREATE TABLE Reservation (
     reservationId INTEGER,
     memberNum INTEGER,
@@ -134,6 +145,7 @@ CREATE TABLE OrderItem (
     itemId INTEGER,
     quantity INTEGER,
 
+    PRIMARY KEY (orderId, itemId),
     FOREIGN KEY (orderId) REFERENCES FoodOrder(orderId),
     FOREIGN KEY (itemId) REFERENCES Item(itemId)
 );
@@ -156,7 +168,7 @@ CREATE TABLE HealthRecord (
     empId INTEGER,
 
     -- vaccination | checkup | feeding schedule | grooming | behavioral note
-    recType VARCHAR2(10) NOT NULL CHECK (revAction IN ('VET', 'CHK', 'SCH', 'GRM', 'BHN')),
+    recType VARCHAR2(10) NOT NULL CHECK (recType IN ('VET', 'CHK', 'SCH', 'GRM', 'BHN')),
     description VARCHAR2(255),
     nextDue DATE,
     status VARCHAR2(10),
@@ -182,19 +194,13 @@ CREATE TABLE AdoptionApp (
 
 CREATE TABLE Adoption (
     adoptId INTEGER,
-    appId INTEGER,
-    memberNum INTEGER,
-    empId INTEGER,
-    petId INTEGER,
+    appId INTEGER, -- removed pet, member, and emp as the application has fields already
     adoptDate DATE,
     fee NUMBER(6, 2),
     followUpSchedule VARCHAR2(255),
 
     PRIMARY KEY (adoptId),
-    FOREIGN KEY (appId) REFERENCES AdoptionApp(appId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
-    FOREIGN KEY (empId) REFERENCES Staff(empId),
-    FOREIGN KEY (petId) REFERENCES Pet(petId)
+    FOREIGN KEY (appId) REFERENCES AdoptionApp(appId)
 );
 
 CREATE TABLE Event (

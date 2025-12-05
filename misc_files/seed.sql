@@ -3,7 +3,7 @@ INSERT INTO Animals VALUES (
 );
 
 INSERT INTO Animals VALUES (
-	'Bird'
+	'BIRD'
 );
 
 INSERT INTO Animals VALUES (
@@ -231,7 +231,7 @@ INSERT INTO Reservation VALUES (
 	3,
 	2,
 	'2025-04-16',
-	'03:00:00' HOUR TO SECOND,
+	INTERVAL '03:00:00' HOUR TO SECOND,
 	'YES',
 	'YES'
 );
@@ -239,8 +239,9 @@ INSERT INTO Reservation VALUES (
 INSERT INTO Reservation VALUES (
 	2,
 	1,
+	2,
 	'25-11-19',
-	'02:00:00' HOUR TO SECOND,
+	INTERVAL '02:00:00' HOUR TO SECOND,
 	'YES',
 	'YES'
 );
@@ -248,8 +249,9 @@ INSERT INTO Reservation VALUES (
 INSERT INTO Reservation VALUES (
 	3,
 	2,
+	3,
 	'25-04-17',
-	'01:30:00' HOUR TO SECOND,
+	INTERVAL '01:30:00' HOUR TO SECOND,
 	'NO',
 	'NO'
 );
@@ -284,7 +286,7 @@ INSERT INTO Item VALUES (
 	'Burger with fries'
 );
 
-INSERT INTO Item VALEUS (
+INSERT INTO Item VALUES (
 	3,
 	5.00,
 	'Ham Sandwitch'
@@ -293,17 +295,17 @@ INSERT INTO Item VALEUS (
 INSERT INTO OrderItem VALUES (
 	1,
 	1,
+	3
+);
+
+INSERT INTO OrderItem VALUES (
+	1,
+	3,
 	1
 );
 
 INSERT INTO OrderItem VALUES (
 	2,
-	1,
-	1,
-);
-
-INSERT INTO OrderItem VALUES (
-	3,
 	2,
 	1
 );
@@ -323,7 +325,19 @@ INSERT INTO Staff VALUES (
 INSERT INTO Staff VALUES (
 	102,
 	'Ariel Lamb',
-	'CHK'
+	'BAR'
+);
+
+INSERT INTO Staff VALUES (
+	103,
+	'Jon Gray',
+	'HDL'
+);
+
+INSERT INTO Staff VALUES (
+	104,
+	'Wayne Lamb',
+	'CRD'
 );
 
 INSERT INTO HealthRecord VALUES (
@@ -335,7 +349,7 @@ INSERT INTO HealthRecord VALUES (
 	102,
 	'CHK',
 	'Everything is good!',
-	,
+	NULL,
 	'Healthy'
 );
 
@@ -355,13 +369,13 @@ INSERT INTO HealthRecord VALUES (
 INSERT INTO HealthRecord VALUES (
 	3,
 	2,
-	'update'
-	'2021-08-22'
+	'update',
+	'2021-08-22',
 	2,
 	101,
 	'VET',
 	'Bird is doing well now',
-	,
+	NULL,
 	'Healthy'
 );
 
@@ -374,6 +388,114 @@ INSERT INTO HealthRecord VALUES (
 	102,
 	'CHK',
 	'Everything is good!',
-	,
+	NULL,
 	'Healthy'
+);
+
+INSERT INTO AdoptionApp VALUES (
+	1,
+	2,
+	103,
+	3,
+	'2023-12-01',
+	'PEN'
+);
+
+INSERT INTO AdoptionApp VALUES (
+	2,
+	2,
+	103,
+	2,
+	'2008-05-06',
+	'REJ'
+);
+
+INSERT INTO AdoptionApp VALUES (
+	3,
+	1,
+	103,
+	1,
+	'2025-12-02',
+	'APP'
+);
+
+INSERT INTO Adoption VALUES (
+	1,
+	1,
+	'2024-01-03',
+	200.00,
+	'Once a month for the first 6 mos.'
+);
+
+INSERT INTO Adoption VALUES (
+	2,
+	3,
+	NULL, -- hasnt happened yet
+	400.00,
+	'Once a month for the first 6 mos.'
+);
+
+INSERT INTO Adoption VALUES (
+	3,
+	2,
+	'2008-05-27',
+	10.00,
+	'Once a month for the first 6 mos.'
+);
+
+INSERT INTO Event VALUES (
+	1,
+	104,
+	'2020-03-13',
+	'02:30:00' HOUR TO SECOND,
+	3,
+	'LAST DAY OF SCHOOL!',
+	6
+);
+
+INSERT INTO Event VALUES (
+	2,
+	104,
+	'2015-07-18',
+	'16:30:00' HOUR TO SECOND,
+	2,
+	'Jamies Birthday!',
+	50
+);
+
+INSERT INTO Event VALUES (
+	3,
+	104,
+	'2023-05-01',
+	'12:30:00' HOUR TO SECOND,
+	1,
+	'Adoption bonanza',
+	2
+);
+
+INSERT INTO Booking VALUES (
+	1,
+	1,
+	2,
+	'REG',
+	TRUE,
+	FALSE
+);
+
+INSERT INTO Booking VALUES (
+	2,
+	1,
+	3,
+	'ATT',
+	FALSE,
+	FALSE
+);
+
+INSERT INTO Booking VALUES (
+	3,
+	2,
+	2,
+	'CAN',
+	TRUE,
+	TRUE
 );
