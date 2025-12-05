@@ -1,8 +1,8 @@
-INSERT INTO Member VALUES (
-    67, 
-    'TestUser', 
-    '777-777-7777', 
-    'test@gmail.com', 
-    '2007-07-07', 
-    'BRONZE'
-);
+-- INSERT INTO Member VALUES (
+--     67, 
+--     'TestUser', 
+--     '777-777-7777', 
+--     'test@gmail.com', 
+--     '2007-07-07', 
+--     'BRONZE', 
+-- );
