@@ -1,5 +1,5 @@
 CREATE TABLE Animals (
-    animalType VARCHAR2(10) NOT NULL CHECK (animalType IN ('CAT', 'DOG', 'BIRD')),
+    animalType VARCHAR2(15) NOT NULL,
     PRIMARY KEY (animalType)
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE Member (
     tele_num VARCHAR2(20),
     email VARCHAR2(255),
     dob DATE,
-    membershipTier VARCHAR2(6) NOT NULL CHECK (membershipTier IN ('BRONZE', 'SILVER', 'GOLD')),
+    membershipTier VARCHAR2(20) NOT NULL CHECK (membershipTier IN ('BRONZE', 'SILVER', 'GOLD', 'NOT CURRENTLY MEMBER')),
 
     PRIMARY KEY (memberNum)
 );
@@ -100,8 +100,8 @@ CREATE TABLE Reservation (
     roomId INTEGER,
     reservationDate DATE,
     timeSlot INTERVAL DAY TO SECOND,
-    checkedIn DATE,
-    checkedOut DATE, 
+    checkedIn VARCHAR2(3) NOT NULL CHECK (checkedIn IN('YES', 'NO')),
+    checkedOut VARCHAR2(3) NOT NULL CHECK (checkedOut IN('YES', 'NO')), 
 
     PRIMARY KEY (reservationId),
     FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
