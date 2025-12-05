@@ -146,3 +146,81 @@ CREATE TABLE Staff (
 
     PRIMARY KEY (empId)
 );
+
+CREATE TABLE HealthRecord (
+    recId INTEGER,
+    revNum INTEGER, -- Add triggers for auto making revs on table changes
+    revAction VARCHAR2(10) NOT NULL CHECK (revAction IN ('insert', 'update', 'delete')),
+    revDate DATE,
+
+    petId INTEGER,
+    empId INTEGER,
+
+    -- vaccination | checkup | feeding schedule | grooming | behavioral note
+    recType VARCHAR2(10) NOT NULL CHECK (revAction IN ('VET', 'CHK', 'SCH', 'GRM', 'BHN')),
+    description VARCHAR2(255),
+    nextDue DATE,
+    status VARCHAR2(10),
+
+    PRIMARY KEY (recId, revNum),
+    FOREIGN KEY (petId) REFERENCES Pet(petId),
+    FOREIGN KEY (empId) REFERENCES Staff(empId)
+);
+
+CREATE TABLE AdoptionApp (
+    appId INTEGER,
+    memberNum INTEGER,
+    empId INTEGER,
+    petId INTEGER,
+    appDate DATE,
+    status VARCHAR2(10) NOT NULL CHECK (status IN ('PEN', 'APP', 'REJ', 'WIT')),
+
+    PRIMARY KEY (appId),
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
+    FOREIGN KEY (empId) REFERENCES Staff(empId),
+    FOREIGN KEY (petId) REFERENCES Pet(petId)
+);
+
+CREATE TABLE Adoption (
+    adoptId INTEGER,
+    appId INTEGER,
+    memberNum INTEGER,
+    empId INTEGER,
+    petId INTEGER,
+    adoptDate DATE,
+    fee NUMBER(6, 2),
+    followUpSchedule VARCHAR2(255),
+
+    PRIMARY KEY (adoptId),
+    FOREIGN KEY (appId) REFERENCES AdoptionApp(appId),
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
+    FOREIGN KEY (empId) REFERENCES Staff(empId),
+    FOREIGN KEY (petId) REFERENCES Pet(petId)
+);
+
+CREATE TABLE Event (
+    eventId INTEGER,
+    coordinator INTEGER, -- TODO: Trigger check coordinator?
+    eventDate DATE,
+    eventTime INTERVAL DAY TO MINUTE,
+    roomId INTEGER,
+    description VARCHAR2(255),
+    maxCapacity INTEGER, -- TODO: TRIGGER TO MAKE SURE EVENT MAX DOES NOT EXCEED ROOM MAX
+
+    PRIMARY KEY (eventId),
+    FOREIGN KEY (coordinator) REFERENCES Staff(empId),
+    FOREIGN KEY (roomId) REFERENCES Room(roomId)
+);
+
+CREATE TABLE Booking (
+    bookingId INTEGER,
+    eventId INTEGER,
+    member INTEGER,
+    status VARCHAR2(10) NOT NULL CHECK (status IN ('REG', 'ATT', 'NOS', 'CAN')),
+    paid BOOLEAN,
+    refunded BOOLEAN,
+
+    PRIMARY KEY (bookingId),
+    FOREIGN KEY (eventId) REFERENCES Event(eventId),
+    FOREIGN KEY (member) REFERENCES Member(memberNum)
+);
