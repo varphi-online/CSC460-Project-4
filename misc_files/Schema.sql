@@ -98,9 +98,8 @@ CREATE TABLE Reservation (
     reservationId INTEGER,
     memberNum INTEGER,
     roomId INTEGER,
-    date DATE,
+    reservationDate DATE,
     timeSlot INTERVAL DAY TO SECOND,
-
     checkedIn DATE,
     checkedOut DATE, 
 
@@ -109,22 +108,23 @@ CREATE TABLE Reservation (
     FOREIGN KEY (roomId) REFERENCES Room(roomId)
 );
 
-CREATE TABLE Orders (
+CREATE TABLE FoodOrder (
     orderId INTEGER,
     memberNum INTEGER,
     reservationId INTEGER,
     orderTime DATE,
-    totalPrice NUMBER,
+    totalPrice NUMBER(6, 2),
     paymentStatus BOOLEAN,
 
     PRIMARY KEY (orderId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
+    FOREIGN KEY (reservationId) REFERENCES Reservation(reservationId)
 );
 
 CREATE TABLE Item (
     itemId INTEGER,
-    price NUMBER(6, 2), 
-    name VARCHAR2(255),
+    price NUMBER(6, 2), -- assuming we won't have prices higher than $9999.99
+    itemName VARCHAR(255),
     
     PRIMARY KEY (itemId)
 );
@@ -134,8 +134,7 @@ CREATE TABLE OrderItem (
     itemId INTEGER,
     quantity INTEGER,
 
-    PRIMARY KEY (orderId, itemId),
-    FOREIGN KEY (orderId) REFERENCES Orders(orderId),
+    FOREIGN KEY (orderId) REFERENCES FoodOrder(orderId),
     FOREIGN KEY (itemId) REFERENCES Item(itemId)
 );
 
