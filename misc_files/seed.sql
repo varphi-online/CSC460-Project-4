@@ -44,14 +44,14 @@ INSERT INTO Room VALUES (
 	4,
 	5
 );
-
 INSERT INTO Pet VALUES (
 	1,
 	'DOG',
 	'Silver labrador',
 	7,
 	'2018-05-14',
-	TRUE
+	TRUE,
+	'Duke'
 );
 
 INSERT INTO Pet VALUES (
@@ -60,7 +60,8 @@ INSERT INTO Pet VALUES (
 	'Chinese Goose',
 	4,
 	'2021-08-15',
-	FALSE
+	FALSE,
+	'Empress'
 );
 
 INSERT INTO Pet VALUES (
@@ -69,7 +70,128 @@ INSERT INTO Pet VALUES (
 	'Persian Cat',
 	3,
 	'2022-11-05',
-	TRUE
+	TRUE,
+	'Ms. Whiskers'
+);
+
+INSERT INTO Pet VALUES (
+	4,
+	'DOG',
+	'Golden Retriever',
+	5,
+	'2020-06-10',
+	TRUE,
+	'Buddy'
+);
+
+INSERT INTO Pet VALUES (
+	5,
+	'CAT',
+	'Siamese',
+	2,
+	'2023-01-20',
+	TRUE,
+	'Luna'
+);
+
+INSERT INTO Pet VALUES (
+	6,
+	'BIRD',
+	'Cockatiel',
+	1,
+	'2024-03-05',
+	TRUE,
+	'Sunny'
+);
+
+INSERT INTO Pet VALUES (
+	7,
+	'DOG',
+	'Beagle',
+	6,
+	'2019-09-12',
+	FALSE,
+	'Charlie'
+);
+
+INSERT INTO Pet VALUES (
+	8,
+	'CAT',
+	'Maine Coon',
+	4,
+	'2021-11-30',
+	TRUE,
+	'Leo'
+);
+
+INSERT INTO Pet VALUES (
+	9,
+	'BIRD',
+	'Parakeet',
+	2,
+	'2022-07-18',
+	TRUE,
+	'Kiwi'
+);
+
+INSERT INTO Pet VALUES (
+	10,
+	'DOG',
+	'Poodle',
+	8,
+	'2016-04-22',
+	FALSE,
+	'Bella'
+);
+
+INSERT INTO Pet VALUES (
+	11,
+	'CAT',
+	'Bengal',
+	5,
+	'2019-05-14',
+	TRUE,
+	'Tiger'
+);
+
+INSERT INTO Pet VALUES (
+	12,
+	'BIRD',
+	'Macaw',
+	3,
+	'2021-12-01',
+	FALSE,
+	'Rio'
+);
+
+INSERT INTO Pet VALUES (
+	13,
+	'DOG',
+	'Shih Tzu',
+	2,
+	'2023-08-09',
+	TRUE,
+	'Max'
+);
+
+INSERT INTO Pet VALUES (
+	14,
+	'CAT',
+	'Russian Blue',
+	1,
+	'2024-02-15',
+	TRUE,
+	'Smokey'
+);
+
+INSERT INTO Pet VALUES (
+	15,
+	'BIRD',
+	'Finch',
+	4,
+	'2020-10-25',
+	TRUE,
+	'Peep'
 );
 
 INSERT INTO PetTemperment VALUES (
@@ -202,7 +324,7 @@ INSERT INTO MemberHistory VALUES (
 	'SILVER'
 );
 
-INSERT INTO EmergancyContact VALUES (
+INSERT INTO EmergencyContact VALUES (
 	1,
 	1,
 	'Criss Wayne',
@@ -210,7 +332,7 @@ INSERT INTO EmergancyContact VALUES (
 	'crissw@gmail.com'
 );
 
-INSERT INTO EmergancyContact VALUES (
+INSERT INTO EmergencyContact VALUES (
 	2,
 	2,
 	'Jeff Baker',
@@ -218,7 +340,7 @@ INSERT INTO EmergancyContact VALUES (
 	'jefferyb@yahoo.com'
 );
 
-INSERT INTO EmergancyContact VALUES (
+INSERT INTO EmergencyContact VALUES (
 	3,
 	3,
 	'Sandra Locks',

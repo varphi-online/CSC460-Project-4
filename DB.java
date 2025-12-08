@@ -119,6 +119,16 @@ public class DB {
     stmt.executeUpdate();
     }
 
+    public static ResultSet executeQuery(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    var rs = stmt.executeQuery();
+    rs.next();
+    return rs;
+    }
+
     public static void printQuery(String sql, Object... params) throws SQLException {
     var stmt = DB.prepared(sql);
     for (int i = 0; i < params.length; i++) {
@@ -208,5 +218,14 @@ public class DB {
 
     private static String padRight(String s, int n) {
         return String.format("%-" + n + "s", s);
+    }
+
+    public static Boolean exists(String sql, Object... params) throws SQLException {
+        var stmt = DB.prepared(sql);
+        for (int i = 0; i < params.length; i++) {
+            stmt.setObject(i + 1, params[i]);
+        }
+        var rs = stmt.executeQuery();
+        return rs.isBeforeFirst();
     }
 }

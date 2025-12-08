@@ -53,15 +53,15 @@ public class Prog4 {
                         new Menu("Withdraw From Event", ()->{withdrawFromEvent();}),
                     }),
                     new Menu("Manage Adoptions").addSubMenu(new Menu[] {
-                        new Menu("My Adoptions", ()->{/**TODO: */}),
-                        new Menu("New Adoption Application", ()->{/**TODO: Req 6 (Insert)*/}),
-                        new Menu("Withdraw Application", ()->{/**TODO: Req 6 (Update status to Withdrawn)*/}),
+                        new Menu("My Adoptions", ()->{listMyAdoptions(false);}),
+                        new Menu("New Adoption Application", ()->{newAdoptionApp();}),
+                        new Menu("Withdraw Application", ()->{withdrawAdoptApp();}),
                     }),
                     new Menu("Profile").addSubMenu(new Menu[] {
                         new Menu("View Personal Details", ()->{getMemInfo();}),
-                        new Menu("Change Membership Tier", ()->{/**TODO: Req 1 (Update)*/}),
+                        new Menu("Change Membership Tier", ()->{changeMembershipTier();}),
                         new Menu("Update Contact Info", ()->{modifyMember();}),
-                        new Menu("Delete Account", ()->{/**TODO: Req 1 (Delete - w/ logic checks)*/}),
+                        new Menu("Delete Account", ()->{deleteMember();}),
                     }),
                 }),
                 new Menu("Staff Dashboard", ()->login(true)).addSubMenu(new Menu[] {
@@ -151,29 +151,36 @@ public class Prog4 {
             // https://modern-sql.com/feature/listagg#:~:text=Syntax,this%20requirement%20is%20not%20fulfilled.
             DB.printQuery("""
                         SELECT
-                            TO_CHAR(r.reservationDate, 'DY, MON DD, YYYY') as "Date",
-                            r.roomId as "Room",
+                        TO_CHAR(r.reservationDate, 'DY, MON DD, YYYY') as "Date",
+                        r.roomId as "Room",
 
-                            COALESCE(
-                                (SELECT LISTAGG(i.itemName || ' (x' || oi.quantity || ')', ', ')
-                                        WITHIN GROUP (ORDER BY i.itemName)
-                                 FROM FoodOrder fo
-                                 JOIN OrderItem oi ON fo.orderId = oi.orderId
-                                 JOIN Item i ON oi.itemId = i.itemId
-                                 WHERE fo.reservationId = r.reservationId),
-                            'No Food Ordered') as "Food Orders",
+                        COALESCE(
+                            (SELECT LISTAGG(i.itemName || ' (x' || oi.quantity || ')', ', ')
+                                    WITHIN GROUP (ORDER BY i.itemName)
+                             FROM FoodOrder fo
+                             JOIN OrderItem oi ON fo.orderId = oi.orderId
+                             JOIN Item i ON oi.itemId = i.itemId
+                             WHERE fo.reservationId = r.reservationId),
+                        'No Food Ordered') as "Food Orders",
 
-                            TO_CHAR(COALESCE(
-                                (SELECT SUM(fo.totalPrice)
-                                 FROM FoodOrder fo
-                                 WHERE fo.reservationId = r.reservationId),
-                            0), '$990.00') as "Total Spent",
+                        TO_CHAR(COALESCE(
+                            (SELECT SUM(fo.totalPrice)
+                             FROM FoodOrder fo
+                             WHERE fo.reservationId = r.reservationId),
+                        0), '$990.00') as "Total Spent",
 
-                            m.membershipTier as "Tier Status"
-                        FROM Reservation r
-                        JOIN Member m ON r.memberNum = m.memberNum
-                        WHERE r.memberNum = ?
-                        ORDER BY r.reservationDate DESC
+                        COALESCE(
+                            (SELECT mh.membershipTier
+                             FROM MemberHistory mh
+                             WHERE mh.memberNum = r.memberNum
+                               AND r.reservationDate >= mh.startDate
+                               AND (mh.endDate IS NULL OR r.reservationDate <= mh.endDate)
+                             FETCH FIRST 1 ROWS ONLY),
+                            'UNKNOWN') as "Tier Status"
+
+                    FROM Reservation r
+                    WHERE r.memberNum = ?
+                    ORDER BY r.reservationDate DESC
                     """, ProgramContext.getUserId());
         } catch (SQLException e) {
             ProgramContext.genericError(e);
@@ -184,10 +191,74 @@ public class Prog4 {
         try {
             DB.printQuery("""
                     SELECT memberNum as "ID", name as "Name", tele_num as "Telephone #",
-                           email as "e-Mail", dob as "Birthday", membershipTier as "Tier"
+                           email as "e-Mail", TO_CHAR(dob, 'MON DD') as "Birthday", membershipTier as "Tier"
                     FROM Member WHERE memberNum = ?
                     """, ProgramContext.getUserId());
         } catch (SQLException e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void changeMembershipTier() {
+        try {
+            var id = ProgramContext.getUserId();
+            System.out.print("What membership tier would you like?\nOptions: Bronze, Silver, Gold (blank for none)\n");
+            var inp = scanner.nextLine().trim().toUpperCase();
+            if (!inp.isEmpty() && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
+                throw new RuntimeException("Selected tier does not exist.");
+            inp = inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp;
+            DB.executeUpdate("UPDATE Member SET membershipTier=? WHERE memberNum=?", inp, id);
+            if (DB.exists("SELECT startDate FROM MemberHistory WHERE memberNum=? AND endDate = NULL", id)) {
+                DB.executeUpdate("UPDATE MemberHistory SET endDate=CURRENT_DATE WHERE memberNum=? AND startDate=?", id,
+                        DB.executeQuery("SELECT startDate FROM MemberHistory WHERE memberNum=? AND endDate = NULL", id)
+                                .getInt(1));
+            }
+            DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", id, inp);
+            ProgramContext.setStatusMessage("Successfully changed membership tier to: %s!".formatted(inp),
+                    ProgramContext.Color.GREEN);
+        } catch (RuntimeException | SQLException e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void deleteMember() {
+        try {
+            int id = ProgramContext.getUserId();
+            if (DB.exists("""
+                    SELECT 1 FROM Member m
+                    WHERE m.memberNum = ?
+                    AND (
+                        EXISTS (
+                            SELECT 1 FROM Reservation r 
+                            WHERE r.memberNum = m.memberNum 
+                            AND r.checkedIn = 'YES' AND r.checkedOut = 'NO'
+                        )
+                        OR EXISTS (
+                            SELECT 1 FROM AdoptionApp a 
+                            WHERE a.memberNum = m.memberNum 
+                            AND a.status = 'PEN'
+                        )
+                        OR EXISTS (
+                            SELECT 1 FROM FoodOrder f 
+                            WHERE f.memberNum = m.memberNum 
+                            AND f.paymentStatus = FALSE
+                        )
+                    )
+                    """, id)) {
+                throw new RuntimeException(
+                        "You have either an active adoption application, reservation, or unpaid food order.");
+            }
+            System.out.println("Are you sure you want to delete your account?\nALL ASSOCIATED RECORDS WILL BE DELETED\nType \"yes\" to proceed.");
+            switch (scanner.nextLine().trim().toLowerCase()) {
+                case "yes" -> {
+                }
+                default -> throw new RuntimeException("Cancelled account deletion");
+            }
+            DB.executeUpdate("""
+                    DELETE FROM Member WHERE memberNum=?
+                    """, id); // cascade handles ref records
+            System.exit(0);
+        } catch (RuntimeException | SQLException e) {
             ProgramContext.genericError(e);
         }
     }
@@ -210,6 +281,7 @@ public class Prog4 {
                 throw new RuntimeException("Selected tier does not exist.");
             stmt.setString(5, inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp);
             stmt.executeUpdate();
+            DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", newId, inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp);
             ProgramContext.setStatusMessage("Successfully registered user with ID: %d!".formatted(newId),
                     ProgramContext.Color.GREEN);
         } catch (RuntimeException | ParseException | SQLException e) {
@@ -267,9 +339,10 @@ public class Prog4 {
     public static void listPets() {
         try {
             DB.printQuery("""
-                    SELECT Pet.petId as "ID", animalType as "Type", breed as "Breed",
-                           age as "Age", doa as "Birthday", adoptable as "Adoptable"
-                    FROM Pet JOIN AdoptionApp USING (petId) WHERE status NOT IN ('PEN', 'APP')
+                    SELECT p.petId as "ID", animalType as "Type", p.name as "Name", p.breed as "Breed",
+                           p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "Birthday", p.adoptable as "Adoptable"
+                    FROM Pet p LEFT OUTER JOIN AdoptionApp a on (p.petId = a.petId AND a.status NOT IN ('PEN', 'APP'))
+                    ORDER BY p.animalType ASC, p.name ASC
                     """);
         } catch (SQLException e) {
             ProgramContext.genericError(e);
@@ -299,17 +372,17 @@ public class Prog4 {
 
     public static void bookReservation() {
         try {
-            System.out.print("Enter Reservation Date (MM-dd-yyyy HH:mm:ss): ");
-            SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+            System.out.print("Enter Reservation Date (MM-dd-yyyy HH:mm): ");
+            SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy HH:mm");
             format.setLenient(false);
             java.sql.Timestamp resDate = new java.sql.Timestamp(format.parse(scanner.nextLine().trim()).getTime());
 
-            System.out.print("Enter Time Slot Duration (HH:mm:ss): ");
+            System.out.print("Enter Time Slot Duration (HH:mm): ");
             String timeSlot = scanner.nextLine().trim();
             var rs = DB.execute("SELECT count(*) FROM Reservation");
             rs.next();
             int resId = rs.getInt(1) + 1;
-            DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, CAST(? AS INTERVAL HOUR TO SECOND), ?, ?)",
+            DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, CAST(? AS INTERVAL HOUR TO MINUTE), ?, ?)",
                     resId,
                     ProgramContext.getUserId(),
                     promptInt("Room ID", null),
@@ -375,15 +448,20 @@ public class Prog4 {
     public static void listAllEvents() {
         try {
             DB.printQuery("""
-                       SELECT e.eventId as "ID",
+                        SELECT 
+                            e.eventId as "ID",
+                            e.description as "Name",
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
-                            e.description,
-                            e.roomId,
-                            (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
+                            e.roomId as "Room #",
+                            COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END) as "Attendees",
+                            e.maxCapacity as "Max Cap.",
+                            (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) as "Spots Left",
+                            s.name as "Coordinator"
                         FROM Event e
                         LEFT JOIN Booking b ON e.eventId = b.eventId
+                        LEFT JOIN Staff s ON s.empId = e.coordinator 
                         GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
-                        HAVING (e.maxCapacity - COUNT(b.bookingId)) > 0
+                        HAVING (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) > 0
                     """);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -397,7 +475,6 @@ public class Prog4 {
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
                             e.description,
                             e.roomId,
-                            (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
                         FROM (Event e
                         JOIN Booking b USING (eventId))
                         WHERE b.member = ? AND b.status NOT IN ('CAN')
@@ -414,7 +491,7 @@ public class Prog4 {
             var evtId = promptInt("Event ID", null);
             if (evtId == null)
                 return;
-            var rs = DB.execute("SELECT count(*) FROM Booking");
+            var rs = DB.execute("SELECT COALESCE(MAX(bookingId), 0) FROM Booking");
             rs.next();
             int bookId = rs.getInt(1) + 1;
 
@@ -579,6 +656,90 @@ public class Prog4 {
                     ProgramContext.getUserId());
 
             ProgramContext.setStatusMessage("Order cancelled.", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void listMyAdoptions(Boolean justApps){
+        try {
+            System.out.println("-- All Applications --");
+            DB.printQuery("""
+                        SELECT a.appId as "ID",
+                            p.name as "Name",
+                            p.age as "Age",
+                            p.breed as  "Breed",
+                            p.animalType as "Species",
+                            TO_CHAR(a.appDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
+                            COALESCE(s.name, 'Pending Review') as "Coordinator",
+                            a.status as "Status"
+                        FROM AdoptionApp a
+                        JOIN Pet p ON a.petId = p.petId
+                        LEFT JOIN Staff s ON a.empId = s.empId
+                        WHERE a.memberNum = ? AND a.status NOT IN ('APP'%s)
+                        ORDER BY a.appDate DESC
+                    """.formatted(justApps ? ",'WIT'":""), ProgramContext.getUserId());
+            if(justApps) return;
+            System.out.println("-- All Adoptions --");
+            try{
+            DB.printQuery("""
+                        SELECT p.adoptId as "ID",
+                            p.name as "Name",
+                            TO_CHAR(p.adoptDate, 'DY, MON DD, YYYY HH:MI AM') as "Adopt Date",
+                            p.fee as "Fee",
+                            p.followUpSchedule as "Follow Up Schedule"
+                        FROM (AdoptionApp a JOIN Pet p USING (petId)) JOIN Adoption p USING (appId)
+                        WHERE a.memberNum = ?
+                        ORDER BY p.adoptDate DESC
+                    """, ProgramContext.getUserId());
+            } catch (Exception e){
+                System.out.println("none.");
+            }
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void withdrawAdoptApp(){
+        try{
+        listMyAdoptions(true);
+        DB.executeUpdate("""
+                UPDATE AdoptionAPP a SET status='WIT' WHERE a.appId=? AND a.memberNum=?
+                """, promptInt("Application ID", null), ProgramContext.getUserId());
+            ProgramContext.setStatusMessage("Adoption withdrwan!", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void newAdoptionApp(){
+        try{
+            DB.printQuery("""
+                    SELECT p.petId as "ID", animalType as "Type", p.name as "Name", p.breed as "Breed",
+                           p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "Birthday"
+                    FROM Pet p LEFT OUTER JOIN AdoptionApp a on (p.petId = a.petId AND a.status NOT IN ('PEN', 'APP'))
+                    WHERE p.adoptable
+                    ORDER BY p.animalType ASC, p.name ASC
+            """);
+            var pid = promptInt("Pet ID you wish to adopt", null);
+            var stmt = DB.prepared("""
+                    SELECT * FROM AdoptionApp 
+                    WHERE petId=? AND memberNum=? AND status IN ('PEN','APP')
+                    """);
+            stmt.setObject(1, pid);
+            stmt.setObject(2, ProgramContext.getUserId());
+            var rs = stmt.executeQuery();
+            if(rs.isBeforeFirst()){
+                ProgramContext.setStatusMessage("You already have a pending application for that pet, or it does not exist!", ProgramContext.Color.RED);
+                return;
+            }
+            var count = DB.execute("SELECT COALESCE(MAX(appId), 0) FROM AdoptionApp");
+            count.next();
+            int appId = count.getInt(1) + 1;
+            DB.executeUpdate("""
+                    INSERT INTO AdoptionApp VALUES (%d, ?, NULL, ?, CURRENT_DATE, 'PEN')
+                    """.formatted(appId), ProgramContext.getUserId(), pid);
+            ProgramContext.setStatusMessage("Created a new application!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
