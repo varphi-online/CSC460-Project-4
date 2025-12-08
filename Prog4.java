@@ -30,11 +30,12 @@ public class Prog4 {
                 new Menu("Customer Registration", ()->{registerMember();}),
                 new Menu("Our Pets", ()->{listPets();}), 
                 new Menu("Customer Dashboard", ()->login(false)).addSubMenu(new Menu[] {
-                    new Menu("View Visit History", ()->{/**TODO: QUERY 2 GOES HERE (Complex History)*/}),
+                    new Menu("View Visit History", ()->{viewVisitHistory();}),
                     new Menu("Food Orders").addSubMenu(new Menu[] {
-                        new Menu("New Order", ()->{/**TODO: Req 3 (Insert)*/}),
-                        new Menu("Update Order", ()->{/**TODO: Req 3 (Update)*/}),
-                        new Menu("Cancel Order", ()->{/**TODO: Req 3 (Delete - conditional)*/})
+                        new Menu("View Orders", ()->{ listMyOrders(); }),
+                        new Menu("New Order", ()->{ placeOrder(); }),
+                        new Menu("Update Order", ()->{ updateOrder(); }),
+                        new Menu("Cancel Order", ()->{ cancelOrder(); })
                     }),
                     new Menu("Manage Reservations").addSubMenu(new Menu[] {
                         new Menu("View my Reservations", ()->{listReservations();}),
@@ -106,28 +107,29 @@ public class Prog4 {
     }
 
     private static String prompt(String label, String current) {
-        System.out.printf("Enter %s %s: ", label, current.isBlank() ? "" : "("+current+")");
+        System.out.printf("Enter %s %s: ", label, current.isBlank() ? "" : "(" + current + ")");
         var input = scanner.nextLine().trim();
         return input.isBlank() ? current : input;
     }
 
     private static Integer promptInt(String label, Integer current) {
-        System.out.printf("Enter %s %s: ", label, current == null ? "" : "("+current+")");
+        System.out.printf("Enter %s %s: ", label, current == null ? "" : "(" + current + ")");
         var input = scanner.nextLine().trim();
         return input.isEmpty() ? current : Integer.valueOf(input);
     }
 
-
-    public static void login(Boolean staff){
+    public static void login(Boolean staff) {
         // No password auth.
-        if(ProgramContext.getUserId() != null &&
-            (ProgramContext.getType() == ProgramContext.UserType.STAFF && staff) ||
-            (ProgramContext.getType() == ProgramContext.UserType.MEMBER && !staff)) return;
+        if (ProgramContext.getUserId() != null &&
+                (ProgramContext.getType() == ProgramContext.UserType.STAFF && staff) ||
+                (ProgramContext.getType() == ProgramContext.UserType.MEMBER && !staff))
+            return;
         System.out.print("Please enter your member id: ");
         String entered = scanner.nextLine().trim();
         try {
             Integer id = Integer.valueOf(entered);
-            var s = DB.prepared(staff ? "SELECT 1 FROM Staff WHERE empId = ?" : "SELECT 1 FROM Member WHERE memberNum = ?");
+            var s = DB.prepared(
+                    staff ? "SELECT 1 FROM Staff WHERE empId = ?" : "SELECT 1 FROM Member WHERE memberNum = ?");
             s.setInt(1, id);
             var rs = s.executeQuery();
             if (!rs.next()) {
@@ -143,19 +145,54 @@ public class Prog4 {
         }
     }
 
-    public static void getMemInfo() {
+    public static void viewVisitHistory() {
         try {
+            System.out.println("--- Visit History ---");
+            // https://modern-sql.com/feature/listagg#:~:text=Syntax,this%20requirement%20is%20not%20fulfilled.
             DB.printQuery("""
-            SELECT memberNum as "ID", name as "Name", tele_num as "Telephone #", 
-                   email as "e-Mail", dob as "Birthday", membershipTier as "Tier"
-            FROM Member WHERE memberNum = ?
-            """, ProgramContext.getUserId());
+                        SELECT
+                            TO_CHAR(r.reservationDate, 'DY, MON DD, YYYY') as "Date",
+                            r.roomId as "Room",
+
+                            COALESCE(
+                                (SELECT LISTAGG(i.itemName || ' (x' || oi.quantity || ')', ', ')
+                                        WITHIN GROUP (ORDER BY i.itemName)
+                                 FROM FoodOrder fo
+                                 JOIN OrderItem oi ON fo.orderId = oi.orderId
+                                 JOIN Item i ON oi.itemId = i.itemId
+                                 WHERE fo.reservationId = r.reservationId),
+                            'No Food Ordered') as "Food Orders",
+
+                            TO_CHAR(COALESCE(
+                                (SELECT SUM(fo.totalPrice)
+                                 FROM FoodOrder fo
+                                 WHERE fo.reservationId = r.reservationId),
+                            0), '$990.00') as "Total Spent",
+
+                            m.membershipTier as "Tier Status"
+                        FROM Reservation r
+                        JOIN Member m ON r.memberNum = m.memberNum
+                        WHERE r.memberNum = ?
+                        ORDER BY r.reservationDate DESC
+                    """, ProgramContext.getUserId());
         } catch (SQLException e) {
             ProgramContext.genericError(e);
         }
     }
 
-    public static void registerMember(){
+    public static void getMemInfo() {
+        try {
+            DB.printQuery("""
+                    SELECT memberNum as "ID", name as "Name", tele_num as "Telephone #",
+                           email as "e-Mail", dob as "Birthday", membershipTier as "Tier"
+                    FROM Member WHERE memberNum = ?
+                    """, ProgramContext.getUserId());
+        } catch (SQLException e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void registerMember() {
         try {
             SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy");
             var rs = DB.execute("SELECT count(*) FROM Member");
@@ -169,16 +206,16 @@ public class Prog4 {
             stmt.setDate(4, new Date(format.parse(scanner.nextLine().trim()).getTime()));
             System.out.print("What membership tier would you like?\nOptions: Bronze, Silver, Gold (blank for none)\n");
             var inp = scanner.nextLine().trim().toUpperCase();
-            if (!inp.isEmpty() && !inp.matches("(BRONZE)|(SILVER)|(GOLD)")) 
+            if (!inp.isEmpty() && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
                 throw new RuntimeException("Selected tier does not exist.");
             stmt.setString(5, inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp);
             stmt.executeUpdate();
-            ProgramContext.setStatusMessage("Successfully registered user with ID: %d!".formatted(newId), ProgramContext.Color.GREEN);
+            ProgramContext.setStatusMessage("Successfully registered user with ID: %d!".formatted(newId),
+                    ProgramContext.Color.GREEN);
         } catch (RuntimeException | ParseException | SQLException e) {
             ProgramContext.genericError(e);
         }
     }
-
 
     public static void modifyMember() {
         try {
@@ -204,13 +241,13 @@ public class Prog4 {
         }
     }
 
-    public static void checkCustIn(){
+    public static void checkCustIn() {
         try {
             int memNum = Integer.parseInt(prompt("Member #", ""));
             DB.printQuery("SELECT reservationId as \"ID\", reservationDate as \"Date\", timeSlot as \"Time\" " +
-                       "FROM Reservation WHERE memberNum=? AND checkedIn='NO'", memNum);
+                    "FROM Reservation WHERE memberNum=? AND checkedIn='NO'", memNum);
             DB.executeUpdate("UPDATE Reservation SET checkedIn='YES' WHERE reservationId=? AND memberNum=?",
-                Integer.valueOf(prompt("Reservation ID", "")), memNum);
+                    Integer.valueOf(prompt("Reservation ID", "")), memNum);
             ProgramContext.setStatusMessage("Checked member in!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -226,14 +263,14 @@ public class Prog4 {
             ProgramContext.genericError(e);
         }
     }
-    
+
     public static void listPets() {
         try {
             DB.printQuery("""
-            SELECT Pet.petId as "ID", animalType as "Type", breed as "Breed", 
-                   age as "Age", doa as "Birthday", adoptable as "Adoptable"
-            FROM Pet JOIN AdoptionApp USING (petId) WHERE status NOT IN ('PEN', 'APP')
-            """);
+                    SELECT Pet.petId as "ID", animalType as "Type", breed as "Breed",
+                           age as "Age", doa as "Birthday", adoptable as "Adoptable"
+                    FROM Pet JOIN AdoptionApp USING (petId) WHERE status NOT IN ('PEN', 'APP')
+                    """);
         } catch (SQLException e) {
             ProgramContext.genericError(e);
         }
@@ -242,18 +279,18 @@ public class Prog4 {
     public static void listReservations() {
         try {
             DB.printQuery("""
-                    SELECT
-                    reservationId as "ID",
-                    TO_CHAR(reservationDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
-                    CASE
-                        WHEN EXTRACT(HOUR FROM timeSlot) > 0 THEN
-                            EXTRACT(HOUR FROM timeSlot) || ' hrs ' || EXTRACT(MINUTE FROM timeSlot) || ' mins'
-                        ELSE
-                            EXTRACT(MINUTE FROM timeSlot) || ' mins'
-                    END as "Booking Length",
-                    roomId as "Room"
-                FROM Reservation
-                WHERE memberNum = ?""",
+                        SELECT
+                        reservationId as "ID",
+                        TO_CHAR(reservationDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
+                        CASE
+                            WHEN EXTRACT(HOUR FROM timeSlot) > 0 THEN
+                                EXTRACT(HOUR FROM timeSlot) || ' hrs ' || EXTRACT(MINUTE FROM timeSlot) || ' mins'
+                            ELSE
+                                EXTRACT(MINUTE FROM timeSlot) || ' mins'
+                        END as "Booking Length",
+                        roomId as "Room"
+                    FROM Reservation
+                    WHERE memberNum = ?""",
                     ProgramContext.getUserId());
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -292,7 +329,7 @@ public class Prog4 {
         try {
             listReservations();
             DB.executeUpdate("DELETE FROM Reservation WHERE reservationId = ? AND memberNum = ?",
-                promptInt("Reservation ID to cancel", null), ProgramContext.getUserId());
+                    promptInt("Reservation ID to cancel", null), ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation cancelled successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -310,7 +347,7 @@ public class Prog4 {
             java.sql.Timestamp newDate = new java.sql.Timestamp(format.parse(scanner.nextLine().trim()).getTime());
 
             DB.executeUpdate("UPDATE Reservation SET reservationDate = ? WHERE reservationId = ? AND memberNum = ?",
-                newDate, resId, ProgramContext.getUserId());
+                    newDate, resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation rescheduled successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -325,8 +362,9 @@ public class Prog4 {
             System.out.print("Enter New Duration (HH:mm:ss): ");
             String newDuration = scanner.nextLine().trim();
 
-            DB.executeUpdate("UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO SECOND) WHERE reservationId = ? AND memberNum = ?",
-                newDuration, resId, ProgramContext.getUserId());
+            DB.executeUpdate(
+                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO SECOND) WHERE reservationId = ? AND memberNum = ?",
+                    newDuration, resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation extended successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -337,56 +375,212 @@ public class Prog4 {
     public static void listAllEvents() {
         try {
             DB.printQuery("""
-               SELECT e.eventId as "ID", 
-                    TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
-                    e.description, 
-                    e.roomId, 
-                    (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
-                FROM Event e 
-                JOIN Booking b USING (eventId)
-                GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
-            """);
-        } catch (Exception e) { ProgramContext.genericError(e); }
+                       SELECT e.eventId as "ID",
+                            TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
+                            e.description,
+                            e.roomId,
+                            (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
+                        FROM Event e
+                        LEFT JOIN Booking b ON e.eventId = b.eventId
+                        GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
+                        HAVING (e.maxCapacity - COUNT(b.bookingId)) > 0
+                    """);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
     }
-    
+
     public static void listMyEvents() {
         try {
             DB.printQuery("""
-                SELECT e.eventId as "ID", 
-                    TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
-                    e.description, 
-                    e.roomId, 
-                    (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
-                FROM (Event e
-                JOIN Booking b USING (eventId))
-                WHERE b.member = ? AND b.status NOT IN ('CAN')
-                GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
-            """, ProgramContext.getUserId());
-        } catch (Exception e) { ProgramContext.genericError(e); }
+                        SELECT e.eventId as "ID",
+                            TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
+                            e.description,
+                            e.roomId,
+                            (e.maxCapacity - COUNT(b.bookingId)) as "Spots Left"
+                        FROM (Event e
+                        JOIN Booking b USING (eventId))
+                        WHERE b.member = ? AND b.status NOT IN ('CAN')
+                        GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
+                    """, ProgramContext.getUserId());
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
     }
 
     public static void registerForEvent() {
         try {
             listAllEvents();
             var evtId = promptInt("Event ID", null);
-            if (evtId == null) return;
-            var rs = DB.execute("SELECT count(*) FROM Booking"); rs.next();
+            if (evtId == null)
+                return;
+            var rs = DB.execute("SELECT count(*) FROM Booking");
+            rs.next();
             int bookId = rs.getInt(1) + 1;
-            
+
             DB.executeUpdate("INSERT INTO Booking VALUES (?, ?, ?, 'REG', 0, 0)",
-                bookId, evtId, ProgramContext.getUserId());
+                    bookId, evtId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Registered for event!", ProgramContext.Color.GREEN);
-        } catch (Exception e) { ProgramContext.genericError(e); }
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
     }
 
     public static void withdrawFromEvent() {
         try {
             listMyEvents();
             var bookId = promptInt("Booking ID to withdraw", null);
-            if (bookId == null) return;
-            DB.executeUpdate("UPDATE Booking SET status = 'CAN' WHERE bookingId = ? AND member = ?", 
-                bookId, ProgramContext.getUserId());
+            if (bookId == null)
+                return;
+            DB.executeUpdate("UPDATE Booking SET status = 'CAN' WHERE bookingId = ? AND member = ?",
+                    bookId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Withdrawn from event.", ProgramContext.Color.GREEN);
-        } catch (Exception e) { ProgramContext.genericError(e); }
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    private static void listFoodItems() throws SQLException {
+        DB.printQuery("SELECT itemId as \"ID\", itemName as \"Item\", '$' || price as \"Price\" FROM Item");
+    }
+
+    private static void listMyOrders() {
+        try {
+            DB.printQuery("""
+                        SELECT orderId as "Order ID",
+                               TO_CHAR(orderTime, 'MM-DD-YYYY HH:MI AM') as "Time",
+                               '$' || totalPrice as "Total",
+                               CASE WHEN paymentStatus THEN 'PAID' ELSE 'UNPAID' END as "Status"
+                        FROM FoodOrder
+                        WHERE memberNum = ?
+                        ORDER BY orderTime DESC
+                    """, ProgramContext.getUserId());
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    private static void recalculateOrderTotal(int orderId) throws SQLException {
+        var rs = DB.prepared("""
+                    SELECT COALESCE(SUM(i.price * oi.quantity), 0)
+                    FROM OrderItem oi
+                    JOIN Item i ON oi.itemId = i.itemId
+                    WHERE oi.orderId = ?
+                """);
+        rs.setInt(1, orderId);
+        var res = rs.executeQuery();
+        res.next();
+        double newTotal = res.getDouble(1);
+
+        DB.executeUpdate("UPDATE FoodOrder SET totalPrice = ? WHERE orderId = ?", newTotal, orderId);
+    }
+
+    public static void placeOrder() {
+        try {
+            listReservations();
+            Integer resId = promptInt("Reservation ID for this order", null);
+            if (resId == null)
+                return;
+
+            var rs = DB.execute("SELECT COALESCE(MAX(orderId), 0) FROM FoodOrder"); // autoincr id
+            rs.next();
+            int newOrderId = rs.getInt(1) + 1;
+
+            DB.executeUpdate("INSERT INTO FoodOrder VALUES (?, ?, ?, CURRENT_TIMESTAMP, 0.00, ?)",
+                    newOrderId, ProgramContext.getUserId(), resId, false);
+
+            System.out.println("Starting Order #" + newOrderId + ". Enter items below.");
+            listFoodItems();
+
+            while (true) {
+                System.out.print("Enter Item ID to add (or 0 to finish): ");
+                int itemId = Integer.parseInt(scanner.nextLine().trim());
+                if (itemId == 0)
+                    break;
+
+                int qty = promptInt("Quantity", 1);
+
+                try {
+                    DB.executeUpdate("INSERT INTO OrderItem VALUES (?, ?, ?)", newOrderId, itemId, qty);
+                    System.out.println("Item added.");
+                } catch (SQLException e) {
+                    System.out.print("Error adding item (might already exist in order): " + e.getMessage());
+                }
+            }
+
+            recalculateOrderTotal(newOrderId);
+            ProgramContext.setStatusMessage("Order placed successfully! Order ID: " + newOrderId,
+                    ProgramContext.Color.GREEN);
+
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void updateOrder() {
+        try {
+            listMyOrders();
+            Integer orderId = promptInt("Order ID to update", null);
+            if (orderId == null)
+                return;
+
+            System.out.println("--- Current Items in Order #" + orderId + " ---");
+            DB.printQuery("""
+                        SELECT i.itemName as "Item", oi.quantity as "Qty",
+                               '$' || (i.price * oi.quantity) as "Subtotal", i.itemId as "ID"
+                        FROM OrderItem oi
+                        JOIN Item i USING (itemId)
+                        WHERE oi.orderId = ?
+                    """, orderId);
+
+            listFoodItems();
+            System.out.println("Enter Item ID to add/update (or 0 to cancel):");
+            int itemId = Integer.parseInt(scanner.nextLine().trim());
+            if (itemId == 0)
+                return;
+
+            int newQty = promptInt("New Quantity (0 to remove)", 1);
+
+            if (newQty > 0) {
+                var check = DB.prepared("SELECT count(*) FROM OrderItem WHERE orderId=? AND itemId=?");
+                check.setInt(1, orderId);
+                check.setInt(2, itemId);
+                var rs = check.executeQuery();
+                rs.next();
+                if (rs.getInt(1) > 0) {
+                    DB.executeUpdate("UPDATE OrderItem SET quantity = ? WHERE orderId = ? AND itemId = ?",
+                            newQty, orderId, itemId);
+                } else {
+                    DB.executeUpdate("INSERT INTO OrderItem VALUES (?, ?, ?)", orderId, itemId, newQty);
+                }
+                System.out.println("Item updated.");
+            } else {
+                DB.executeUpdate("DELETE FROM OrderItem WHERE orderId = ? AND itemId = ?", orderId, itemId);
+                System.out.println("Item removed.");
+            }
+
+            recalculateOrderTotal(orderId);
+            ProgramContext.setStatusMessage("Order updated successfully!", ProgramContext.Color.GREEN);
+
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void cancelOrder() {
+        try {
+            listMyOrders();
+            Integer orderId = promptInt("Order ID to cancel", null);
+            if (orderId == null)
+                return;
+
+            DB.executeUpdate("DELETE FROM OrderItem WHERE orderId = ?", orderId); // cascade
+            DB.executeUpdate("DELETE FROM FoodOrder WHERE orderId = ? AND memberNum = ?", orderId,
+                    ProgramContext.getUserId());
+
+            ProgramContext.setStatusMessage("Order cancelled.", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
     }
 }
