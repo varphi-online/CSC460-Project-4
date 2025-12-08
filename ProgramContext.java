@@ -77,5 +77,6 @@ public class ProgramContext {
 
     public static void genericError(Exception e){
         setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+        throw new RuntimeException(e.getMessage());
     }
 }

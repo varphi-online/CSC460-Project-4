@@ -63,11 +63,15 @@ public class Menu {
             System.out.print("\033[2J\033[H"); // Clear
             String bc = ProgramContext.getBreadcrumb();
             System.out.println(bc + " │\n" + "─".repeat(bc.length() + 1) + "╯");
-            if (callback != null) {
-                callback.run();
+            try{
+                if (callback != null) {
+                    callback.run();
+                }
+                System.out.print("\n(Press Enter to continue...)");
+                Prog4.getScanner().nextLine();
+            } catch (Exception e){
+                return;
             }
-            System.out.print("\n(Press Enter to continue...)");
-            Prog4.getScanner().nextLine();
             return; // Return to prev
         }
 

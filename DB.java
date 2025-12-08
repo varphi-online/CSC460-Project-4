@@ -104,9 +104,10 @@ public class DB {
     }
 
  public static String tabularize(ResultSet rs) {
-        StringBuilder sb = new StringBuilder();
-        
-        try {
+     StringBuilder sb = new StringBuilder();
+     
+     try {
+            if(!rs.isBeforeFirst()) throw new RuntimeException("No data.");
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
             
