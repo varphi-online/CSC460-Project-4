@@ -103,6 +103,30 @@ public class DB {
         return null;
     }
 
+    public static void safeExecute(Runnable action) {
+    try {
+        action.run();
+    } catch (Exception e) {
+        ProgramContext.genericError(e);
+    }
+    }
+
+    public static void executeUpdate(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    stmt.executeUpdate();
+    }
+
+    public static void printQuery(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    System.out.println(DB.tabularize(stmt.executeQuery()));
+    }
+
  public static String tabularize(ResultSet rs) {
      StringBuilder sb = new StringBuilder();
      
