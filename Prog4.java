@@ -266,9 +266,7 @@ public class Prog4 {
     public static void registerMember() {
         try {
             SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy");
-            var rs = DB.execute("SELECT count(*) FROM Member");
-            rs.next();
-            int newId = rs.getInt(1) + 1;
+            int newId = DB.uniqueId("Member", "memberNum");
             var stmt = DB.prepared("INSERT INTO Member VALUES ( %d, ?, ?, ?, ?, ? )".formatted(newId));
             stmt.setString(1, prompt("Name", ""));
             stmt.setString(2, prompt("Phone", ""));
@@ -379,9 +377,7 @@ public class Prog4 {
 
             System.out.print("Enter Time Slot Duration (HH:mm): ");
             String timeSlot = scanner.nextLine().trim();
-            var rs = DB.execute("SELECT count(*) FROM Reservation");
-            rs.next();
-            int resId = rs.getInt(1) + 1;
+            int resId = DB.uniqueId("Reservation", "reservationId");
             DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, CAST(? AS INTERVAL HOUR TO MINUTE), ?, ?)",
                     resId,
                     ProgramContext.getUserId(),
@@ -491,9 +487,7 @@ public class Prog4 {
             var evtId = promptInt("Event ID", null);
             if (evtId == null)
                 return;
-            var rs = DB.execute("SELECT COALESCE(MAX(bookingId), 0) FROM Booking");
-            rs.next();
-            int bookId = rs.getInt(1) + 1;
+            int bookId = DB.uniqueId("Booking", "bookingId");
 
             DB.executeUpdate("INSERT INTO Booking VALUES (?, ?, ?, 'REG', 0, 0)",
                     bookId, evtId, ProgramContext.getUserId());
@@ -559,9 +553,7 @@ public class Prog4 {
             if (resId == null)
                 return;
 
-            var rs = DB.execute("SELECT COALESCE(MAX(orderId), 0) FROM FoodOrder"); // autoincr id
-            rs.next();
-            int newOrderId = rs.getInt(1) + 1;
+            int newOrderId = DB.uniqueId("FoodOrder", "orderId");
 
             DB.executeUpdate("INSERT INTO FoodOrder VALUES (?, ?, ?, CURRENT_TIMESTAMP, 0.00, ?)",
                     newOrderId, ProgramContext.getUserId(), resId, false);
@@ -733,9 +725,7 @@ public class Prog4 {
                 ProgramContext.setStatusMessage("You already have a pending application for that pet, or it does not exist!", ProgramContext.Color.RED);
                 return;
             }
-            var count = DB.execute("SELECT COALESCE(MAX(appId), 0) FROM AdoptionApp");
-            count.next();
-            int appId = count.getInt(1) + 1;
+            int appId = DB.uniqueId("AdoptionApp", "appId");
             DB.executeUpdate("""
                     INSERT INTO AdoptionApp VALUES (%d, ?, NULL, ?, CURRENT_DATE, 'PEN')
                     """.formatted(appId), ProgramContext.getUserId(), pid);
