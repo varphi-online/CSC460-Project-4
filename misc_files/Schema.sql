@@ -24,7 +24,8 @@ CREATE TABLE Pet (
     breed VARCHAR2(255),
     age INTEGER NOT NULL CHECK (age > -1),
     doa DATE, 
-    adoptable BOOLEAN, 
+    adoptable BOOLEAN,
+    name VARCHAR2(255),
 
     PRIMARY KEY (petId),
     FOREIGN KEY (animalType) REFERENCES Animals(animalType)
@@ -35,7 +36,7 @@ CREATE TABLE PetTemperment (
     petId INTEGER,
 
     PRIMARY KEY (temperment, petId),
-    FOREIGN KEY (petId) REFERENCES Pet(petId)
+    FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE
 );
 
 CREATE TABLE Area (
@@ -46,8 +47,8 @@ CREATE TABLE Area (
     designatedAdoptArea BOOLEAN,
 
     PRIMARY KEY (sector, roomId),
-    FOREIGN KEY (roomId) REFERENCES Room(roomId),
-    FOREIGN KEY (animalType) REFERENCES Animals(animalType)
+    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE,
+    FOREIGN KEY (animalType) REFERENCES Animals(animalType) ON DELETE SET NULL
 );
 
 CREATE TABLE PetRoomHistory (
@@ -58,9 +59,9 @@ CREATE TABLE PetRoomHistory (
     endDate DATE,
 
     PRIMARY KEY (petId, startDate),
-    FOREIGN KEY (petId) REFERENCES Pet(petId),
-    FOREIGN KEY (roomId) REFERENCES Room(roomId),
-    FOREIGN KEY (sector, roomId) REFERENCES Area(sector, roomId) 
+    FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE,
+    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE,
+    FOREIGN KEY (sector, roomId) REFERENCES Area(sector, roomId) ON DELETE CASCADE
 );
 
 CREATE TABLE Member (
@@ -78,9 +79,9 @@ CREATE TABLE MemberHistory (
     memberNum INTEGER,
     startDate DATE,
     endDate DATE,
-    membershipTier VARCHAR2(6) NOT NULL CHECK (membershipTier IN ('BRONZE', 'SILVER', 'GOLD')),
+    membershipTier VARCHAR2(20) NOT NULL CHECK (membershipTier IN ('BRONZE', 'SILVER', 'GOLD', 'NOT CURRENTLY MEMBER')),
 
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum) ON DELETE CASCADE
 );
 
 CREATE TABLE EmergencyContact (
@@ -91,18 +92,7 @@ CREATE TABLE EmergencyContact (
     email VARCHAR2(255),
 
     PRIMARY KEY (contactId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
-);
-
-CREATE TABLE EmergancyContact (
-    emergencyId INTEGER,
-    memberNum INTEGER,
-    name VARCHAR2(255),
-    telNum VARCHAR2(20),
-    email VARCHAR2(255),
-
-    PRIMARY KEY (emergencyId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum)
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum) ON DELETE CASCADE
 );
 
 CREATE TABLE Reservation (
@@ -112,11 +102,11 @@ CREATE TABLE Reservation (
     reservationDate DATE,
     timeSlot INTERVAL DAY TO SECOND,
     checkedIn VARCHAR2(3) NOT NULL CHECK (checkedIn IN('YES', 'NO')),
-    checkedOut VARCHAR2(3) NOT NULL CHECK (checkedOut IN('YES', 'NO')), 
+    checkedOut VARCHAR2(3) NOT NULL CHECK (checkedOut IN('YES', 'NO')),
 
     PRIMARY KEY (reservationId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
-    FOREIGN KEY (roomId) REFERENCES Room(roomId)
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum) ON DELETE CASCADE,
+    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
 CREATE TABLE FoodOrder (
@@ -129,7 +119,7 @@ CREATE TABLE FoodOrder (
 
     PRIMARY KEY (orderId),
     FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
-    FOREIGN KEY (reservationId) REFERENCES Reservation(reservationId)
+    FOREIGN KEY (reservationId) REFERENCES Reservation(reservationId) ON DELETE CASCADE
 );
 
 CREATE TABLE Item (
@@ -146,8 +136,8 @@ CREATE TABLE OrderItem (
     quantity INTEGER,
 
     PRIMARY KEY (orderId, itemId),
-    FOREIGN KEY (orderId) REFERENCES FoodOrder(orderId),
-    FOREIGN KEY (itemId) REFERENCES Item(itemId)
+    FOREIGN KEY (orderId) REFERENCES FoodOrder(orderId) ON DELETE CASCADE,
+    FOREIGN KEY (itemId) REFERENCES Item(itemId) ON DELETE CASCADE
 );
 
 CREATE TABLE Staff (
@@ -174,8 +164,8 @@ CREATE TABLE HealthRecord (
     status VARCHAR2(10),
 
     PRIMARY KEY (recId, revNum),
-    FOREIGN KEY (petId) REFERENCES Pet(petId),
-    FOREIGN KEY (empId) REFERENCES Staff(empId)
+    FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE,
+    FOREIGN KEY (empId) REFERENCES Staff(empId) ON DELETE SET NULL
 );
 
 CREATE TABLE AdoptionApp (
@@ -187,9 +177,9 @@ CREATE TABLE AdoptionApp (
     status VARCHAR2(10) NOT NULL CHECK (status IN ('PEN', 'APP', 'REJ', 'WIT')),
 
     PRIMARY KEY (appId),
-    FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
-    FOREIGN KEY (empId) REFERENCES Staff(empId),
-    FOREIGN KEY (petId) REFERENCES Pet(petId)
+    FOREIGN KEY (memberNum) REFERENCES Member(memberNum) ON DELETE CASCADE,
+    FOREIGN KEY (empId) REFERENCES Staff(empId) ON DELETE SET NULL,
+    FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE
 );
 
 CREATE TABLE Adoption (
@@ -200,7 +190,7 @@ CREATE TABLE Adoption (
     followUpSchedule VARCHAR2(255),
 
     PRIMARY KEY (adoptId),
-    FOREIGN KEY (appId) REFERENCES AdoptionApp(appId)
+    FOREIGN KEY (appId) REFERENCES AdoptionApp(appId) ON DELETE CASCADE
 );
 
 CREATE TABLE Event (
@@ -213,8 +203,8 @@ CREATE TABLE Event (
     maxCapacity INTEGER, -- TODO: TRIGGER TO MAKE SURE EVENT MAX DOES NOT EXCEED ROOM MAX
 
     PRIMARY KEY (eventId),
-    FOREIGN KEY (coordinator) REFERENCES Staff(empId),
-    FOREIGN KEY (roomId) REFERENCES Room(roomId)
+    FOREIGN KEY (coordinator) REFERENCES Staff(empId) ON DELETE SET NULL,
+    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
 CREATE TABLE Booking (
@@ -226,6 +216,6 @@ CREATE TABLE Booking (
     refunded BOOLEAN,
 
     PRIMARY KEY (bookingId),
-    FOREIGN KEY (eventId) REFERENCES Event(eventId),
-    FOREIGN KEY (member) REFERENCES Member(memberNum)
+    FOREIGN KEY (eventId) REFERENCES Event(eventId) ON DELETE CASCADE,
+    FOREIGN KEY (member) REFERENCES Member(memberNum) ON DELETE CASCADE
 );

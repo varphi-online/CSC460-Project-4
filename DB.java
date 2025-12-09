@@ -103,10 +103,61 @@ public class DB {
         return null;
     }
 
+    public static void safeExecute(Runnable action) {
+    try {
+        action.run();
+    } catch (Exception e) {
+        ProgramContext.genericError(e);
+    }
+    }
+
+    public static void executeUpdate(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    stmt.executeUpdate();
+    }
+
+    public static ResultSet executeQuery(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    var rs = stmt.executeQuery();
+    rs.next();
+    return rs;
+    }
+
+    public static void printQuery(String sql, Object... params) throws SQLException {
+    var stmt = DB.prepared(sql);
+    for (int i = 0; i < params.length; i++) {
+        stmt.setObject(i + 1, params[i]);
+    }
+    System.out.println(DB.tabularize(stmt.executeQuery()));
+    }
+
+    public static Integer uniqueId(String tableName, String columnName) throws SQLException {
+        String sql = String.format(
+                "SELECT COALESCE(MAX(%s), 0) + 1 AS next_id FROM %s",
+                columnName, tableName);
+
+        try (var stmt = db.createStatement();
+                var rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1); // next_id
+            } else {
+                return 1;
+            }
+        }
+    }
+
  public static String tabularize(ResultSet rs) {
-        StringBuilder sb = new StringBuilder();
-        
-        try {
+     StringBuilder sb = new StringBuilder();
+     
+     try {
+            if(!rs.isBeforeFirst()) throw new RuntimeException("No data.");
             ResultSetMetaData rsmd = rs.getMetaData();
             int columnCount = rsmd.getColumnCount();
             
@@ -183,5 +234,14 @@ public class DB {
 
     private static String padRight(String s, int n) {
         return String.format("%-" + n + "s", s);
+    }
+
+    public static Boolean exists(String sql, Object... params) throws SQLException {
+        var stmt = DB.prepared(sql);
+        for (int i = 0; i < params.length; i++) {
+            stmt.setObject(i + 1, params[i]);
+        }
+        var rs = stmt.executeQuery();
+        return rs.isBeforeFirst();
     }
 }
