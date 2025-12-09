@@ -151,6 +151,22 @@ public class DB {
     System.out.println(DB.tabularize(stmt.executeQuery()));
     }
 
+    public static Integer uniqueId(String tableName, String columnName) throws SQLException {
+        String sql = String.format(
+                "SELECT COALESCE(MAX(%s), 0) + 1 AS next_id FROM %s",
+                columnName, tableName);
+
+        try (var stmt = db.createStatement();
+                var rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1); // next_id
+            } else {
+                return 1;
+            }
+        }
+    }
+
  public static String tabularize(ResultSet rs) {
      StringBuilder sb = new StringBuilder();
      
