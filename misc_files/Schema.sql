@@ -1,15 +1,7 @@
-CREATE TABLE Animals (
-    animalType VARCHAR2(15) NOT NULL,
-    PRIMARY KEY (animalType)
-);
-
-CREATE TABLE AnimalNeed (
-    need VARCHAR2(255),
-    animalType VARCHAR2(10),
-
-    PRIMARY KEY (need),
-    FOREIGN KEY (animalType) REFERENCES Animals(animalType)
-);
+-- CREATE TABLE Animals (
+--     animalType VARCHAR2(15) NOT NULL,
+--     PRIMARY KEY (animalType)
+-- );
 
 CREATE TABLE Room(
     roomId INTEGER,
@@ -18,17 +10,30 @@ CREATE TABLE Room(
     PRIMARY KEY (roomId)
 );
 
+-- This can be used for an auto-incrementing PK for Pet. 
+CREATE SEQUENCE pet_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE;
+
 CREATE TABLE Pet (
     petId INTEGER,
-    animalType VARCHAR2(10),
+    animalType VARCHAR2(15),
     breed VARCHAR2(255),
     age INTEGER NOT NULL CHECK (age > -1),
     doa DATE, 
     adoptable BOOLEAN,
     name VARCHAR2(255),
 
-    PRIMARY KEY (petId),
-    FOREIGN KEY (animalType) REFERENCES Animals(animalType)
+    PRIMARY KEY (petId)
+);
+
+CREATE TABLE PetNeed (
+    need VARCHAR2(255),
+    petId INTEGER,
+
+    PRIMARY KEY (need),
+    FOREIGN KEY (petId) REFERENCES Pet(petId)
 );
 
 CREATE TABLE PetTemperment (

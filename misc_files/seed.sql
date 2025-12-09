@@ -1,29 +1,14 @@
-INSERT INTO Animals VALUES (
-	'CAT'
-);
+-- INSERT INTO Animals VALUES (
+-- 	'CAT'
+-- );
 
-INSERT INTO Animals VALUES (
-	'BIRD'
-);
+-- INSERT INTO Animals VALUES (
+-- 	'BIRD'
+-- );
 
-INSERT INTO Animals VALUES (
-	'DOG'
-);
-
-INSERT INTO AnimalNeed VALUES (
-	'Food 3 times a day',
-	'CAT'
-);
-
-INSERT INTO AnimalNeed VALUES (
-	'Bath twice a month',
-	'DOG'
-);
-
-INSERT INTO AnimalNeed VALUES (
-	'Alone Time 1 hour/week',
-	'BIRD'
-);
+-- INSERT INTO Animals VALUES (
+-- 	'DOG'
+-- );
 
 INSERT INTO Room VALUES (
 	1,
@@ -45,7 +30,7 @@ INSERT INTO Room VALUES (
 	5
 );
 INSERT INTO Pet VALUES (
-	1,
+	pet_seq.NEXTVAL,
 	'DOG',
 	'Silver labrador',
 	7,
@@ -55,7 +40,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	2,
+	pet_seq.NEXTVAL,
 	'BIRD',
 	'Chinese Goose',
 	4,
@@ -65,7 +50,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	3,
+	pet_seq.NEXTVAL,
 	'CAT',
 	'Persian Cat',
 	3,
@@ -75,7 +60,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	4,
+	pet_seq.NEXTVAL,
 	'DOG',
 	'Golden Retriever',
 	5,
@@ -85,7 +70,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	5,
+	pet_seq.NEXTVAL,
 	'CAT',
 	'Siamese',
 	2,
@@ -95,7 +80,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	6,
+	pet_seq.NEXTVAL,
 	'BIRD',
 	'Cockatiel',
 	1,
@@ -105,7 +90,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	7,
+	pet_seq.NEXTVAL,
 	'DOG',
 	'Beagle',
 	6,
@@ -115,7 +100,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	8,
+	pet_seq.NEXTVAL,
 	'CAT',
 	'Maine Coon',
 	4,
@@ -125,7 +110,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	9,
+	pet_seq.NEXTVAL,
 	'BIRD',
 	'Parakeet',
 	2,
@@ -135,7 +120,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	10,
+	pet_seq.NEXTVAL,
 	'DOG',
 	'Poodle',
 	8,
@@ -145,7 +130,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	11,
+	pet_seq.NEXTVAL,
 	'CAT',
 	'Bengal',
 	5,
@@ -155,7 +140,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	12,
+	pet_seq.NEXTVAL,
 	'BIRD',
 	'Macaw',
 	3,
@@ -165,7 +150,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	13,
+	pet_seq.NEXTVAL,
 	'DOG',
 	'Shih Tzu',
 	2,
@@ -175,7 +160,7 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	14,
+	pet_seq.NEXTVAL,
 	'CAT',
 	'Russian Blue',
 	1,
@@ -185,13 +170,28 @@ INSERT INTO Pet VALUES (
 );
 
 INSERT INTO Pet VALUES (
-	15,
+	pet_seq.NEXTVAL,
 	'BIRD',
 	'Finch',
 	4,
 	'2020-10-25',
 	TRUE,
 	'Peep'
+);
+
+INSERT INTO PetNeed VALUES (
+	'Food 3 times a day',
+	1
+);
+
+INSERT INTO PetNeed VALUES (
+	'Bath twice a month',
+	2
+);
+
+INSERT INTO PetNeed VALUES (
+	'Alone Time 1 hour/week',
+	3
 );
 
 INSERT INTO PetTemperment VALUES (
