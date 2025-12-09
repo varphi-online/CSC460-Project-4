@@ -270,7 +270,7 @@ INSERT INTO PetRoomHistory VALUES (
 
 
 INSERT INTO Member VALUES (
-	1,
+	member_seq.NEXTVAL,
 	'John Wayne',
 	'415-456-3028',
 	'johnW@yahoo.com',
@@ -279,7 +279,7 @@ INSERT INTO Member VALUES (
 );
 
 INSERT INTO Member VALUES (
-	2,
+	member_seq.NEXTVAL,
 	'Emily Barker',
 	'925-488-2415',
 	'emmy4@gmail.com',
@@ -288,7 +288,7 @@ INSERT INTO Member VALUES (
 );
 
 INSERT INTO Member VALUES (
-	3,
+	member_seq.NEXTVAL,
 	'Justin Lakes',
 	'713-331-8703',
 	'thisjustin@gmail.com',

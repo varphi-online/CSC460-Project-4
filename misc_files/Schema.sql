@@ -17,12 +17,12 @@ CREATE SEQUENCE pet_seq
     NOCACHE;
 
 CREATE TABLE Pet (
-    petId INTEGER,
-    animalType VARCHAR2(15),
+    petId INTEGER NOT NULL,
+    animalType VARCHAR2(15) NOT NULL,
     breed VARCHAR2(255),
     age INTEGER NOT NULL CHECK (age > -1),
-    doa DATE, 
-    adoptable BOOLEAN,
+    doa DATE NOT NULL, 
+    adoptable BOOLEAN NOT NULL,
     name VARCHAR2(255),
 
     PRIMARY KEY (petId)
@@ -52,8 +52,7 @@ CREATE TABLE Area (
     designatedAdoptArea BOOLEAN,
 
     PRIMARY KEY (sector, roomId),
-    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE,
-    FOREIGN KEY (animalType) REFERENCES Animals(animalType) ON DELETE SET NULL
+    FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
 CREATE TABLE PetRoomHistory (
@@ -69,8 +68,14 @@ CREATE TABLE PetRoomHistory (
     FOREIGN KEY (sector, roomId) REFERENCES Area(sector, roomId) ON DELETE CASCADE
 );
 
+-- This can be used for an auto-incrementing PK for Member. 
+CREATE SEQUENCE member_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE;
+
 CREATE TABLE Member (
-    memberNum INTEGER,
+    memberNum INTEGER NOT NULL,
     name VARCHAR2(255),
     tele_num VARCHAR2(20),
     email VARCHAR2(255),
@@ -101,9 +106,9 @@ CREATE TABLE EmergencyContact (
 );
 
 CREATE TABLE Reservation (
-    reservationId INTEGER,
-    memberNum INTEGER,
-    roomId INTEGER,
+    reservationId INTEGER NOT NULL,
+    memberNum INTEGER NOT NULL,
+    roomId INTEGER NOT NULL,
     reservationDate DATE,
     timeSlot INTERVAL DAY TO SECOND,
     checkedIn VARCHAR2(3) NOT NULL CHECK (checkedIn IN('YES', 'NO')),
