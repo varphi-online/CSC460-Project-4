@@ -75,8 +75,20 @@ public class ProgramContext {
         statusMessage = null;
     }
 
-    public static void genericError(Exception e){
-        setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+    public static void genericError(Exception e) {
+        failureMessage("An error occurred: " + e.getMessage());
         throw new RuntimeException(e.getMessage());
+    }
+
+    public static void successMessage(String msg) {
+        setStatusMessage(msg, ProgramContext.Color.GREEN);
+    }
+
+    public static void failureMessage(String msg) {
+        setStatusMessage(msg, ProgramContext.Color.RED);
+    }
+
+    public static void warningMessage(String msg) {
+        setStatusMessage(msg, ProgramContext.Color.YELLOW);
     }
 }
