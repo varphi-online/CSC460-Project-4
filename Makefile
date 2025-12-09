@@ -1,4 +1,4 @@
-Prog4.class : Prog4.java Menu.class UI.class DB.class ProgramContext.class
+Prog4.class : Prog4.java Menu.class UI.class DB.class ProgramContext.class Prompt.class
 	javac Prog4.java
 
 Menu.class UI.class : Menu.java UI.java
@@ -9,6 +9,9 @@ DB.class : DB.java
 
 ProgramContext.class : ProgramContext.java
 	javac ProgramContext.java
+
+Prompt.class : Prompt.java
+	javac Prompt.java
 
 .PHONY: clean
 clean:

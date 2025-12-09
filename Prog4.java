@@ -26,19 +26,19 @@ public class Prog4 {
          */
 
         ui.setInitialMode(
-            new Menu("Home", ()->{System.out.println("Welcome to El Jefe Cat Cafe!");}).addSubMenu(new Menu[] {
-                new Menu("Customer Registration", ()->{registerMember();}),
-                new Menu("Our Pets", ()->{listPets();}), 
+            new Menu("Home", ()->System.out.println("Welcome to El Jefe Cat Cafe!")).addSubMenu(new Menu[] {
+                new Menu("Customer Registration", ()->registerMember()),
+                new Menu("Our Pets", ()->listPets()), 
                 new Menu("Customer Dashboard", ()->login(false)).addSubMenu(new Menu[] {
-                    new Menu("View Visit History", ()->{viewVisitHistory();}),
+                    new Menu("View Visit History", ()->viewVisitHistory()),
                     new Menu("Food Orders").addSubMenu(new Menu[] {
-                        new Menu("View Orders", ()->{ listMyOrders(); }),
-                        new Menu("New Order", ()->{ placeOrder(); }),
-                        new Menu("Update Order", ()->{ updateOrder(); }),
-                        new Menu("Cancel Order", ()->{ cancelOrder(); })
+                        new Menu("View Orders", ()-> listMyOrders() ),
+                        new Menu("New Order", ()->placeOrder()),
+                        new Menu("Update Order", ()->updateOrder()),
+                        new Menu("Cancel Order", ()->cancelOrder())
                     }),
                     new Menu("Manage Reservations").addSubMenu(new Menu[] {
-                        new Menu("View my Reservations", ()->{listReservations();}),
+                        new Menu("View my Reservations", ()->listReservations()),
                         new Menu("Book a Reservation", ()->bookReservation()),
                         new Menu("Cancel a Reservation", ()->cancelReservation()),
                         new Menu("Update a Reservation").addSubMenu(new Menu[] {
@@ -47,31 +47,31 @@ public class Prog4 {
                         }),
                     }),
                     new Menu("Manage Events").addSubMenu(new Menu[] {
-                        new Menu("Show Registered Events", ()->{listMyEvents();}),
-                        new Menu("Show All Events", ()->{listAllEvents();}),
-                        new Menu("Register for Event", ()->{registerForEvent();}),
-                        new Menu("Withdraw From Event", ()->{withdrawFromEvent();}),
+                        new Menu("Show Registered Events", ()->listMyEvents()),
+                        new Menu("Show All Events", ()->listAllEvents()),
+                        new Menu("Register for Event", ()->registerForEvent()),
+                        new Menu("Withdraw From Event", ()->withdrawFromEvent()),
                     }),
                     new Menu("Manage Adoptions").addSubMenu(new Menu[] {
-                        new Menu("My Adoptions", ()->{listMyAdoptions(false);}),
-                        new Menu("New Adoption Application", ()->{newAdoptionApp();}),
-                        new Menu("Withdraw Application", ()->{withdrawAdoptApp();}),
+                        new Menu("My Adoptions", ()->listMyAdoptions(false)),
+                        new Menu("New Adoption Application", ()->newAdoptionApp()),
+                        new Menu("Withdraw Application", ()->withdrawAdoptApp()),
                     }),
                     new Menu("Profile").addSubMenu(new Menu[] {
-                        new Menu("View Personal Details", ()->{getMemInfo();}),
-                        new Menu("Change Membership Tier", ()->{changeMembershipTier();}),
-                        new Menu("Update Contact Info", ()->{modifyMember();}),
-                        new Menu("Delete Account", ()->{deleteMember();}),
+                        new Menu("View Personal Details", ()->getMemInfo()),
+                        new Menu("Change Membership Tier", ()->changeMembershipTier()),
+                        new Menu("Update Contact Info", ()->modifyMember()),
+                        new Menu("Delete Account", ()->deleteMember()),
                     }),
                 }),
                 new Menu("Staff Dashboard", ()->login(true)).addSubMenu(new Menu[] {
                     new Menu("Front Desk Operations").addSubMenu(new Menu[] {
-                         new Menu("Check Customer In", ()->{checkCustIn();}),
-                         new Menu("Check Customer Out", ()->{checkCustOut();}),
-                         new Menu("Business Analytics", ()->{/**TODO: QUERY 4 (Custom Query)*/})
+                        new Menu("Check Customer In", ()->checkCustIn()),
+                        new Menu("Check Customer Out", ()->checkCustOut()),
+                        new Menu("Business Analytics", ()->{/**TODO: QUERY 4 (Custom Query)*/})
                     }),
                     new Menu("Pets").addSubMenu(new Menu[] {
-                        new Menu("Add New Pet", ()->{/**TODO: Req 2 (Insert)*/}),
+                        new Menu("Add New Pet", ()->{addPet();/**TODO: Req 2 (Insert)*/}),
                         new Menu("Update Pet Info", ()->{/**TODO: Req 2 (Update)*/}),
                         new Menu("Remove A Pet", ()->{/**TODO: Req 2 (Delete - conditional)*/}),
                         new Menu("Pet Info").addSubMenu(new Menu[] {
@@ -105,29 +105,15 @@ public class Prog4 {
         ui.run();
         DB.db.close();
     }
-
-    private static String prompt(String label, String current) {
-        System.out.printf("Enter %s %s: ", label, current.isBlank() ? "" : "(" + current + ")");
-        var input = scanner.nextLine().trim();
-        return input.isBlank() ? current : input;
-    }
-
-    private static Integer promptInt(String label, Integer current) {
-        System.out.printf("Enter %s %s: ", label, current == null ? "" : "(" + current + ")");
-        var input = scanner.nextLine().trim();
-        return input.isEmpty() ? current : Integer.valueOf(input);
-    }
-
+    
     public static void login(Boolean staff) {
         // No password auth.
         if (ProgramContext.getUserId() != null &&
                 (ProgramContext.getType() == ProgramContext.UserType.STAFF && staff) ||
                 (ProgramContext.getType() == ProgramContext.UserType.MEMBER && !staff))
             return;
-        System.out.print("Please enter your member id: ");
-        String entered = scanner.nextLine().trim();
+        var id = Prompt.integer("Please enter your member id: ", null);
         try {
-            Integer id = Integer.valueOf(entered);
             var s = DB.prepared(
                     staff ? "SELECT 1 FROM Staff WHERE empId = ?" : "SELECT 1 FROM Member WHERE memberNum = ?");
             s.setInt(1, id);
@@ -202,11 +188,12 @@ public class Prog4 {
     public static void changeMembershipTier() {
         try {
             var id = ProgramContext.getUserId();
-            System.out.print("What membership tier would you like?\nOptions: Bronze, Silver, Gold (blank for none)\n");
-            var inp = scanner.nextLine().trim().toUpperCase();
-            if (!inp.isEmpty() && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
-                throw new RuntimeException("Selected tier does not exist.");
-            inp = inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp;
+
+            var inp = Prompt.choice("What membership tier you would like?", new String[] { "Bronze", "Silver", "Gold", null });
+            if (inp == null) {
+                inp = "NOT CURRENTLY MEMBER";
+            }
+            inp = inp.toUpperCase();
             DB.executeUpdate("UPDATE Member SET membershipTier=? WHERE memberNum=?", inp, id);
             if (DB.exists("SELECT startDate FROM MemberHistory WHERE memberNum=? AND endDate = NULL", id)) {
                 DB.executeUpdate("UPDATE MemberHistory SET endDate=CURRENT_DATE WHERE memberNum=? AND startDate=?", id,
@@ -265,24 +252,32 @@ public class Prog4 {
 
     public static void registerMember() {
         try {
-            SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy");
-            int newId = DB.uniqueId("Member", "memberNum");
-            var stmt = DB.prepared("INSERT INTO Member VALUES ( %d, ?, ?, ?, ?, ? )".formatted(newId));
-            stmt.setString(1, prompt("Name", ""));
-            stmt.setString(2, prompt("Phone", ""));
-            stmt.setString(3, prompt("Email", ""));
-            System.out.print("Please enter your birthday (MM-dd-yyyy): ");
-            stmt.setDate(4, new Date(format.parse(scanner.nextLine().trim()).getTime()));
-            System.out.print("What membership tier would you like?\nOptions: Bronze, Silver, Gold (blank for none)\n");
-            var inp = scanner.nextLine().trim().toUpperCase();
-            if (!inp.isEmpty() && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
-                throw new RuntimeException("Selected tier does not exist.");
-            stmt.setString(5, inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp);
+            var rs = DB.execute("SELECT count(*) FROM Member");
+            rs.next();
+            var stmt = DB.prepared("INSERT INTO Member VALUES ( member_seq.NEXTVAL, ?, ?, ?, ?, ? )", true);
+            stmt.setString(1, Prompt.string("Name", ""));
+            stmt.setString(2, Prompt.string("Phone", ""));
+            stmt.setString(3, Prompt.string("Email", ""));
+            stmt.setDate(4, Prompt.date("Your Birthday", "MM-dd-yyyy", null));
+            var inp = Prompt.choice("What membership tier you would like?", new String[] { "Bronze", "Silver", "Gold", null });
+            if (inp == null) {
+                inp = "NOT CURRENTLY MEMBER";
+            }
+            inp = inp.toUpperCase();
+            // if (inp != null && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
+            //     throw new RuntimeException("Selected tier does not exist.");
+            stmt.setString(5, inp);
             stmt.executeUpdate();
-            DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", newId, inp.isEmpty() ? "NOT CURRENTLY MEMBER" : inp);
-            ProgramContext.setStatusMessage("Successfully registered user with ID: %d!".formatted(newId),
-                    ProgramContext.Color.GREEN);
-        } catch (RuntimeException | ParseException | SQLException e) {
+            var keys = stmt.getGeneratedKeys();
+            if (keys.next()) {
+                int id = keys.getInt(1);
+                DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", id, inp);
+                ProgramContext.successMessage("Successfully registered user with ID: %d!".formatted(id));
+            } else {
+                ProgramContext.failureMessage("Failed to retrieve Member ID!");
+            }
+
+        } catch (Exception e) {
             ProgramContext.genericError(e);
         }
     }
@@ -299,13 +294,13 @@ public class Prog4 {
 
             var upd = DB.prepared("UPDATE Member SET name=?, tele_num=?, email=? WHERE memberNum=?");
             System.out.println("Press Enter to keep existing info.");
-            upd.setString(1, prompt("Name", rs.getString(1)));
-            upd.setString(2, prompt("Phone", rs.getString(2)));
-            upd.setString(3, prompt("Email", rs.getString(3)));
+            upd.setString(1, Prompt.string("Name", rs.getString(1)));
+            upd.setString(2, Prompt.string("Phone", rs.getString(2)));
+            upd.setString(3, Prompt.string("Email", rs.getString(3)));
             upd.setInt(4, id);
 
             upd.executeUpdate();
-            ProgramContext.setStatusMessage("Contact info updated!", ProgramContext.Color.GREEN);
+            ProgramContext.successMessage("Contact info updated!");
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
@@ -313,12 +308,12 @@ public class Prog4 {
 
     public static void checkCustIn() {
         try {
-            int memNum = Integer.parseInt(prompt("Member #", ""));
+            int memNum = Prompt.integer("Member #", null);
             DB.printQuery("SELECT reservationId as \"ID\", reservationDate as \"Date\", timeSlot as \"Time\" " +
                     "FROM Reservation WHERE memberNum=? AND checkedIn='NO'", memNum);
             DB.executeUpdate("UPDATE Reservation SET checkedIn='YES' WHERE reservationId=? AND memberNum=?",
-                    Integer.valueOf(prompt("Reservation ID", "")), memNum);
-            ProgramContext.setStatusMessage("Checked member in!", ProgramContext.Color.GREEN);
+                    Prompt.integer("Reservation ID", null), memNum);
+            ProgramContext.successMessage("Checked member in!");
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
@@ -326,7 +321,7 @@ public class Prog4 {
 
     public static void checkCustOut() {
         try {
-            var memNum = Integer.parseInt(prompt("Member #", ""));
+            var memNum = Prompt.integer("Member #", null);
             DB.executeUpdate("UPDATE Reservation SET checkedOut='YES' WHERE memberNum=?", memNum);
             ProgramContext.setStatusMessage("Checked member out!", ProgramContext.Color.GREEN);
         } catch (SQLException e) {
@@ -334,11 +329,33 @@ public class Prog4 {
         }
     }
 
+    public static void addPet() {
+        try {
+            var stmt = DB.prepared("INSERT INTO Pet VALUES (pet_seq.NEXTVAL, ?, ?, ?, ?, ?, ? )", true);
+            stmt.setString(1, Prompt.string("Animal Type", ""));
+            stmt.setString(2, Prompt.stringNullable("Breed", null));
+            stmt.setInt(3, Prompt.integer("Age", null));
+            stmt.setDate(4, Prompt.date("Pet's Date Of Arrival", "MM-dd-yyyy", null));
+            stmt.setBoolean(5, Prompt.bool("adoptable?", null));
+            stmt.setString(6, Prompt.stringNullable("Name", null));
+            stmt.executeUpdate();
+            var keys = stmt.getGeneratedKeys();
+            if (keys.next()) {
+                int id = keys.getInt(1);
+                ProgramContext.successMessage("Added Pet with ID: %d!".formatted(id));
+            } else {
+                ProgramContext.failureMessage("Failed to retrieve Pet ID!");
+            }
+        } catch (SQLException e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    
     public static void listPets() {
         try {
             DB.printQuery("""
                     SELECT p.petId as "ID", animalType as "Type", p.name as "Name", p.breed as "Breed",
-                           p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "Birthday", p.adoptable as "Adoptable"
+                           p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "DOA", p.adoptable as "Adoptable"
                     FROM Pet p LEFT OUTER JOIN AdoptionApp a on (p.petId = a.petId AND a.status NOT IN ('PEN', 'APP'))
                     ORDER BY p.animalType ASC, p.name ASC
                     """);
@@ -370,25 +387,21 @@ public class Prog4 {
 
     public static void bookReservation() {
         try {
-            System.out.print("Enter Reservation Date (MM-dd-yyyy HH:mm): ");
-            SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy HH:mm");
-            format.setLenient(false);
-            java.sql.Timestamp resDate = new java.sql.Timestamp(format.parse(scanner.nextLine().trim()).getTime());
-
-            System.out.print("Enter Time Slot Duration (HH:mm): ");
-            String timeSlot = scanner.nextLine().trim();
+            String resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null).toString();
+            String timeSlot = Prompt.time("Time Slot Duration", "HH:mm").toString();
+            var rs = DB.execute("SELECT count(*) FROM Reservation");
+            rs.next();
             int resId = DB.uniqueId("Reservation", "reservationId");
             DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, CAST(? AS INTERVAL HOUR TO MINUTE), ?, ?)",
                     resId,
                     ProgramContext.getUserId(),
-                    promptInt("Room ID", null),
+                    Prompt.integer("Room ID", null),
                     resDate,
                     timeSlot,
                     "NO",
                     "NO");
 
-            ProgramContext.setStatusMessage("Reservation booked successfully! ID: " + resId,
-                    ProgramContext.Color.GREEN);
+            ProgramContext.successMessage("Reservation booked successfully! ID: " + resId);
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
@@ -398,7 +411,7 @@ public class Prog4 {
         try {
             listReservations();
             DB.executeUpdate("DELETE FROM Reservation WHERE reservationId = ? AND memberNum = ?",
-                    promptInt("Reservation ID to cancel", null), ProgramContext.getUserId());
+                    Prompt.integer("Reservation ID to cancel", null), ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation cancelled successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -408,16 +421,11 @@ public class Prog4 {
     public static void rescheduleReservation() {
         try {
             listReservations();
-            System.out.print("Enter Reservation ID to reschedule: ");
-            int resId = Integer.parseInt(scanner.nextLine().trim());
-            System.out.print("Enter New Reservation Date (MM-dd-yyyy HH:mm:ss): ");
-            SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
-            format.setLenient(false);
-            java.sql.Timestamp newDate = new java.sql.Timestamp(format.parse(scanner.nextLine().trim()).getTime());
-
+            var resId = Prompt.integer("Reservation ID to reschedule: ", null);
+            var newDate = Prompt.timestamp("New Reservation Date", "MM-dd-yyyy HH:mm:ss", null);
             DB.executeUpdate("UPDATE Reservation SET reservationDate = ? WHERE reservationId = ? AND memberNum = ?",
                     newDate, resId, ProgramContext.getUserId());
-            ProgramContext.setStatusMessage("Reservation rescheduled successfully!", ProgramContext.Color.GREEN);
+            ProgramContext.successMessage("Reservation rescheduled successfully!");
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
@@ -426,14 +434,11 @@ public class Prog4 {
     public static void extendReservation() {
         try {
             listReservations();
-            System.out.print("Enter Reservation ID to extend: ");
-            int resId = Integer.parseInt(scanner.nextLine().trim());
-            System.out.print("Enter New Duration (HH:mm:ss): ");
-            String newDuration = scanner.nextLine().trim();
-
+            var resId = Prompt.integer("Reservation ID to extend: ", null);
+            var newDuration = Prompt.time("New Duration", "HH:mm:ss");
             DB.executeUpdate(
                     "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO SECOND) WHERE reservationId = ? AND memberNum = ?",
-                    newDuration, resId, ProgramContext.getUserId());
+                    newDuration.toString(), resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation extended successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -484,7 +489,7 @@ public class Prog4 {
     public static void registerForEvent() {
         try {
             listAllEvents();
-            var evtId = promptInt("Event ID", null);
+            var evtId = Prompt.integer("Event ID", null);
             if (evtId == null)
                 return;
             int bookId = DB.uniqueId("Booking", "bookingId");
@@ -500,7 +505,7 @@ public class Prog4 {
     public static void withdrawFromEvent() {
         try {
             listMyEvents();
-            var bookId = promptInt("Booking ID to withdraw", null);
+            var bookId = Prompt.integer("Booking ID to withdraw", null);
             if (bookId == null)
                 return;
             DB.executeUpdate("UPDATE Booking SET status = 'CAN' WHERE bookingId = ? AND member = ?",
@@ -549,7 +554,7 @@ public class Prog4 {
     public static void placeOrder() {
         try {
             listReservations();
-            Integer resId = promptInt("Reservation ID for this order", null);
+            Integer resId = Prompt.integer("Reservation ID for this order", null);
             if (resId == null)
                 return;
 
@@ -562,12 +567,11 @@ public class Prog4 {
             listFoodItems();
 
             while (true) {
-                System.out.print("Enter Item ID to add (or 0 to finish): ");
-                int itemId = Integer.parseInt(scanner.nextLine().trim());
+                int itemId = Prompt.integer("Item ID to add (or 0 to finish)", null);
                 if (itemId == 0)
                     break;
 
-                int qty = promptInt("Quantity", 1);
+                int qty = Prompt.integer("Quantity", 1);
 
                 try {
                     DB.executeUpdate("INSERT INTO OrderItem VALUES (?, ?, ?)", newOrderId, itemId, qty);
@@ -589,7 +593,7 @@ public class Prog4 {
     public static void updateOrder() {
         try {
             listMyOrders();
-            Integer orderId = promptInt("Order ID to update", null);
+            Integer orderId = Prompt.integer("Order ID to update", null);
             if (orderId == null)
                 return;
 
@@ -603,12 +607,11 @@ public class Prog4 {
                     """, orderId);
 
             listFoodItems();
-            System.out.println("Enter Item ID to add/update (or 0 to cancel):");
-            int itemId = Integer.parseInt(scanner.nextLine().trim());
+            int itemId = Prompt.integer("Enter Item ID to add/update (or 0 to cancel):", null);
             if (itemId == 0)
                 return;
 
-            int newQty = promptInt("New Quantity (0 to remove)", 1);
+            int newQty = Prompt.integer("New Quantity (0 to remove)", 1);
 
             if (newQty > 0) {
                 var check = DB.prepared("SELECT count(*) FROM OrderItem WHERE orderId=? AND itemId=?");
@@ -639,7 +642,7 @@ public class Prog4 {
     public static void cancelOrder() {
         try {
             listMyOrders();
-            Integer orderId = promptInt("Order ID to cancel", null);
+            Integer orderId = Prompt.integer("Order ID to cancel", null);
             if (orderId == null)
                 return;
 
@@ -697,7 +700,7 @@ public class Prog4 {
         listMyAdoptions(true);
         DB.executeUpdate("""
                 UPDATE AdoptionAPP a SET status='WIT' WHERE a.appId=? AND a.memberNum=?
-                """, promptInt("Application ID", null), ProgramContext.getUserId());
+                """, Prompt.integer("Application ID", null), ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Adoption withdrwan!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -713,7 +716,7 @@ public class Prog4 {
                     WHERE p.adoptable
                     ORDER BY p.animalType ASC, p.name ASC
             """);
-            var pid = promptInt("Pet ID you wish to adopt", null);
+            var pid = Prompt.integer("Pet ID you wish to adopt", null);
             var stmt = DB.prepared("""
                     SELECT * FROM AdoptionApp 
                     WHERE petId=? AND memberNum=? AND status IN ('PEN','APP')
