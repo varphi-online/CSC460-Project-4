@@ -262,6 +262,7 @@ CREATE TABLE Event (
 --     );
 --   END IF;
 -- END;
+-- /
 
 -- CREATE OR REPLACE TRIGGER CheckEventCapacity
 -- BEFORE INSERT OR UPDATE OF roomId, maxCapacity
