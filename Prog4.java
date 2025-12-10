@@ -82,7 +82,7 @@ public class Prog4 {
                         new Menu("Remove A Pet", ()->deletePet()),
                         new Menu("Pet Info").addSubMenu(new Menu[] {
                             new Menu("View Adoption Applications", ()->viewAdoptionAppsForPet()),
-                            new Menu("Health Info", ()->viewHealthInfoForPet()),
+                            new Menu("Health Info", ()->{/**TODO: */}),
                         }),
                     }),
                     new Menu("Veterinary").addSubMenu(new Menu[] {
@@ -339,22 +339,6 @@ public class Prog4 {
         }
     }
 
-    /* validates that an ID exists in the specified table. returns the ID for convenience. */
-    public static Integer validateID(Integer id, String relation, String idName) throws SQLException {
-        var rs = DB.executeQuery("SELECT 1 FROM %s WHERE %s = ?".formatted(relation, idName), id);
-        if (!rs.next())
-            throw new SQLException("ID not found.");
-        return id;
-    }
-
-    public static void printPetInfo(Integer id) throws SQLException {
-        DB.printQuery("""
-                SELECT *
-                FROM Pet
-                WHERE petId = ?
-                """, id);
-    }
-
     public static void addPet() {
         try {
             var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(DB.uniqueId("Pet", "petId")), true);
@@ -368,8 +352,6 @@ public class Prog4 {
             var keys = stmt.getGeneratedKeys();
             if (keys.next()) {
                 int id = keys.getInt(1);
-                System.out.println("Added the following pet entry to databse:");
-                printPetInfo(id);
                 ProgramContext.successMessage("Added Pet with ID: %d!".formatted(id));
             } else {
                 ProgramContext.failureMessage("Failed to retrieve Pet ID!");
@@ -381,21 +363,13 @@ public class Prog4 {
 
     public static void updatePet() {
         try {
-            listPets();
-            int id = validateID(
-                    Prompt.integer("ID of pet you wish to edit", null),
-                    "Pet",
-                    "petId");
+            var id = Prompt.integer("ID of pet you wish to edit", null);
+            var rs = DB.executeQuery("SELECT animalType, breed, age, doa, adoptable, name FROM Pet WHERE petId = ?", id);
 
-            System.out.println("Current Pet Info:");
-            printPetInfo(id);
-            
-            var rs = DB.executeQuery("""
-                    SELECT animalType, breed, age, doa, adoptable, name
-                    FROM Pet
-                    WHERE petId = ?""",
-                    id);
-            rs.next();
+            if (!rs.next())
+                throw new SQLException("Pet data not found.");
+
+            System.out.println("Press Enter to keep existing info.");
             DB.executeUpdate("UPDATE Pet SET animalType=?, breed=?, age=?, doa=?, adoptable=?, name=? WHERE petId=?", 
                     Prompt.string("animalType", rs.getString(1)), 
                     Prompt.string("Breed", rs.getString(2)),
@@ -413,13 +387,11 @@ public class Prog4 {
     
     public static void deletePet() {
         try {
-            listPets();
-            int id = validateID(
-                    Prompt.integer("ID of Pet you wish to delete", null),
-                    "Pet",
-                    "petId");
-            System.out.println("Pet Info:");
-            printPetInfo(id);
+            int id = Prompt.integer("ID of Pet you wish to delete", null);
+            var rs = DB.executeQuery("SELECT 1 FROM Pet WHERE petId = ?", id);
+            if (!rs.next())
+                throw new SQLException("Pet not found.");
+
             Boolean confirmed = Prompt.bool("Are you sure you want to delete this pet with ID %d?\nALL ASSOCIATED RECORDS WILL BE DELETED\n".formatted(id), false);
             if (confirmed) {
                 DB.executeUpdate("DELETE FROM Pet WHERE petId = ?", id);
@@ -433,66 +405,27 @@ public class Prog4 {
     public static void viewAdoptionAppsForPet() {
         try {
             listPets();
-            int id = validateID(
-                    Prompt.integer("ID of Pet you want to view applications for", null),
-                    "Pet",
-                    "petId");
-            System.out.println("Pet Info:");
-            printPetInfo(id);
-            try {
-                DB.printQuery("""
-                        SELECT  a.appId as "ID",
-                                m.name as "Name",
-                                a.appDate as "Application Date",
-                                a.status as "Status",
-                                s.name as "Adoption Coordinator"
-                        FROM AdoptionApp a
-                        JOIN Member m ON (a.memberNum = m.memberNum)
-                        JOIN STAFF s  ON (a.empId = s.empId)
-                        WHERE a.petId = ?
-                        """,
-                        id);
-            } catch (SQLException e) {
-                ProgramContext.warningMessage("No Adoption Application data available for pet.");
-            }
+            var id = Prompt.integer("ID of Pet you want to view applications for", null);
+            var rs = DB.executeQuery("SELECT 1 FROM Pet WHERE petId = ?", id);
+            if (!rs.next())
+                throw new SQLException("Pet not found.");
+
+            DB.printQuery("""
+                    SELECT  a.appId as "ID",
+                            m.name as "Name",
+                            a.appDate as "Application Date",
+                            a.status as "Status",
+                            s.name as "Adoption Coordinator"
+                    FROM AdoptionApp a
+                    JOIN Member m ON (a.memberNum = m.memberNum)
+                    JOIN STAFF s  ON (a.empId = s.empId)
+                    WHERE a.petId = ?
+                    """,
+                    id);
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
     }
-
-    public static void viewHealthInfoForPet() {
-        try {
-            listPets();
-            var id = validateID(
-                    Prompt.integer("ID of Pet you want to view health records of", null),
-                    "Pet",
-                    "petId");
-            System.out.println("Pet Info:");
-            printPetInfo(id);
-            try {
-                DB.printQuery("""
-                        SELECT  r.recId       as "ID",
-                                r.revNum      as "Revision Number",
-                                r.revAction   as "Revision Action",
-                                r.revDate     as "Revision Date",
-                                s.name        as "Staff Member",
-                                r.recType     as "Record Type",
-                                r.description as "Description",
-                                r.nextDue     as "Next Due",
-                                r.status      as "Status"
-                        FROM HealthRecord r
-                        JOIN STAFF s ON (r.empId = s.empId)
-                        WHERE r.petId = ?
-                        """,
-                        id);
-            } catch (Exception e) {
-                ProgramContext.warningMessage("No Health data available for pet.");
-            }
-        } catch (Exception e) {
-            ProgramContext.genericError(e);
-        }
-    }
-
     public static void listPets() {
         try {
             DB.printQuery("""
