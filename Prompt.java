@@ -170,6 +170,9 @@ public class Prompt {
             var input = scanner.nextLine().trim();
             if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             try {
+                if (input.isBlank() && current != null) {
+                    return current;
+                }
                 return new Date(format.parse(input).getTime());
             } catch (ParseException e) {
                 System.out.println("Error: Invalid format.");
@@ -227,11 +230,11 @@ public class Prompt {
 
     public static Boolean bool(String label, Boolean current) {
         while (true) {
-            System.out.printf("Is %s (yes/no)%s: ",
+            System.out.printf("%s (yes/no)%s: ",
                     label,
                     current == null
                             ? ""
-                            : " (current: " + current + ")");
+                            : " (current: " + (current ? "yes" : "no") + ")");
             var input = scanner.nextLine().trim().toLowerCase();
             if (input.isEmpty() && current != null)
                 return current;
