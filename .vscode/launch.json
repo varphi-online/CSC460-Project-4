@@ -13,7 +13,8 @@
             "classPaths": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/misc_files/h2-2.4.240.jar"
-            ]
+            ],
+            "preLaunchTask": "make-build"
         },
         {
             "name": "Debug Prog4",
@@ -25,7 +26,8 @@
             "classPaths": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/misc_files/h2-2.4.240.jar"
-            ]
+            ],
+            "preLaunchTask": "make-build"
         }
     ]
 }
