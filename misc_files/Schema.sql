@@ -119,6 +119,29 @@ CREATE TABLE Reservation (
     FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
+-- CREATE OR REPLACE TRIGGER CheckReservationCheckIn
+-- BEFORE INSERT OR UPDATE OF checkedIn ON Reservation
+-- FOR EACH ROW
+-- DECLARE
+--     end_time DATE;
+-- BEGIN
+--     IF :NEW.checkedIn = 'YES' THEN
+--         end_time := :NEW.reservationDate + :NEW.timeSlot;
+--         IF SYSDATE < :NEW.reservationDate THEN
+--             RAISE_APPLICATION_ERROR(
+--                 -20002, 
+--                 'Check-in failed: It is too early for this reservation.'
+--             );
+--         END IF;
+--         IF SYSDATE > end_time THEN
+--             RAISE_APPLICATION_ERROR(
+--                 -20003, 
+--                 'Check-in failed: The time slot for this reservation has passed.'
+--             );
+--         END IF;   
+--     END IF;
+-- END;
+
 CREATE TABLE FoodOrder (
     orderId INTEGER,
     memberNum INTEGER,
@@ -178,6 +201,28 @@ CREATE TABLE HealthRecord (
     FOREIGN KEY (empId) REFERENCES Staff(empId) ON DELETE SET NULL
 );
 
+-- update by inserting
+-- CREATE OR REPLACE TRIGGER HealthRecordRevision
+-- BEFORE INSERT ON HealthRecord
+-- FOR EACH ROW
+-- DECLARE
+--     v_max_rev INTEGER;
+-- BEGIN
+--     :NEW.revDate := SYSDATE;
+--     SELECT NVL(MAX(revNum), 0)
+--     INTO v_max_rev
+--     FROM HealthRecord
+--     WHERE recId = :NEW.recId;
+--     :NEW.revNum := v_max_rev + 1;
+--     IF :NEW.revAction IS NULL THEN
+--         IF :NEW.revNum = 1 THEN
+--             :NEW.revAction := 'insert';
+--         ELSE
+--             :NEW.revAction := 'update';
+--         END IF;
+--     END IF;
+-- END;
+
 CREATE TABLE AdoptionApp (
     appId INTEGER,
     memberNum INTEGER,
@@ -205,17 +250,55 @@ CREATE TABLE Adoption (
 
 CREATE TABLE Event (
     eventId INTEGER,
-    coordinator INTEGER, -- TODO: Trigger check coordinator?
+    coordinator INTEGER,
     eventDate DATE,
     eventTime INTERVAL DAY TO MINUTE,
     roomId INTEGER,
     description VARCHAR2(255),
-    maxCapacity INTEGER, -- TODO: TRIGGER TO MAKE SURE EVENT MAX DOES NOT EXCEED ROOM MAX
+    maxCapacity INTEGER,
 
     PRIMARY KEY (eventId),
     FOREIGN KEY (coordinator) REFERENCES Staff(empId) ON DELETE SET NULL,
     FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
+
+-- CREATE OR REPLACE TRIGGER CheckEventCoordinator
+-- BEFORE INSERT ON Event FOR EACH ROW
+-- DECLARE
+--   v_count INTEGER;
+-- BEGIN
+--   SELECT COUNT(*)
+--     INTO v_count
+--     FROM Staff
+--    WHERE Staff.empId = :NEW.coordinator
+--      AND Staff.empType = 'CRD';
+
+--   IF v_count = 0 THEN
+--     RAISE_APPLICATION_ERROR(
+--       -20001,
+--       'Coordinator for event must be a coordinator employee.'
+--     );
+--   END IF;
+-- END;
+
+-- CREATE OR REPLACE TRIGGER CheckEventCapacity
+-- BEFORE INSERT OR UPDATE OF roomId, maxCapacity
+-- ON Event FOR EACH ROW
+-- DECLARE
+--   rm_cap INTEGER;
+-- BEGIN
+--   SELECT Room.maxCapacity
+--     INTO rm_cap
+--     FROM Room
+--    WHERE Room.roomId = :NEW.roomId;
+
+--   IF :NEW.maxCapacity > rm_cap THEN
+--     RAISE_APPLICATION_ERROR(
+--       -20001,
+--       'Event capacity exceeds selected Room'
+--     );
+--   END IF;
+-- END;
 
 CREATE TABLE Booking (
     bookingId INTEGER,
