@@ -1,35 +1,3 @@
-INSERT INTO Animals VALUES ('CAT');
-INSERT INTO Animals VALUES ('BIRD');
-INSERT INTO Animals VALUES ('DOG');
-INSERT INTO Animals VALUES ('HAMSTER');
-INSERT INTO Animals VALUES ('RABBIT');
-INSERT INTO Animals VALUES ('GUINEA PIG');
-INSERT INTO Animals VALUES ('SNAKE');
-INSERT INTO Animals VALUES ('LIZARD');
-INSERT INTO Animals VALUES ('TURTLE');
-INSERT INTO Animals VALUES ('FERRET');
-INSERT INTO Animals VALUES ('HORSE');
-INSERT INTO Animals VALUES ('FISH');
-INSERT INTO Animals VALUES ('MOUSE');
-INSERT INTO Animals VALUES ('CHINCHILLA');
-INSERT INTO Animals VALUES ('FROG');
-
-INSERT INTO AnimalNeed VALUES ('Food 3 times a day', 'CAT');
-INSERT INTO AnimalNeed VALUES ('Bath twice a month', 'DOG');
-INSERT INTO AnimalNeed VALUES ('Alone Time 1 hour/week', 'BIRD');
-INSERT INTO AnimalNeed VALUES ('Fresh veggies daily', 'RABBIT');
-INSERT INTO AnimalNeed VALUES ('Heat lamp 12 hours', 'LIZARD');
-INSERT INTO AnimalNeed VALUES ('Cedar shavings change', 'HAMSTER');
-INSERT INTO AnimalNeed VALUES ('Timothy hay access', 'GUINEA PIG');
-INSERT INTO AnimalNeed VALUES ('Live crickets weekly', 'FROG');
-INSERT INTO AnimalNeed VALUES ('UVB Lighting', 'TURTLE');
-INSERT INTO AnimalNeed VALUES ('Dust bath weekly', 'CHINCHILLA');
-INSERT INTO AnimalNeed VALUES ('Salt lick access', 'HORSE');
-INSERT INTO AnimalNeed VALUES ('Water pH check', 'FISH');
-INSERT INTO AnimalNeed VALUES ('Humidity control', 'SNAKE');
-INSERT INTO AnimalNeed VALUES ('Chew toys for teeth', 'MOUSE');
-INSERT INTO AnimalNeed VALUES ('Hammock for sleeping', 'FERRET');
-
 INSERT INTO Room VALUES (1, 12);
 INSERT INTO Room VALUES (2, 8);
 INSERT INTO Room VALUES (3, 8);
@@ -61,6 +29,15 @@ INSERT INTO Pet VALUES (12, 'BIRD', 'Macaw', 3, '2021-12-01', FALSE, 'Rio');
 INSERT INTO Pet VALUES (13, 'DOG', 'Shih Tzu', 2, '2023-08-09', TRUE, 'Max');
 INSERT INTO Pet VALUES (14, 'CAT', 'Russian Blue', 1, '2024-02-15', TRUE, 'Smokey');
 INSERT INTO Pet VALUES (15, 'BIRD', 'Finch', 4, '2020-10-25', TRUE, 'Peep');
+
+INSERT INTO PetNeed VALUES ('Food 3 times a day', 3);  -- Mapped to Cat
+INSERT INTO PetNeed VALUES ('Bath twice a month', 1);  -- Mapped to Dog
+INSERT INTO PetNeed VALUES ('Alone Time 1 hour/week', 2); -- Mapped to Bird
+INSERT INTO PetNeed VALUES ('Fresh veggies daily', 6); -- Mapped to Cockatiel
+INSERT INTO PetNeed VALUES ('UVB Lighting', 9);       -- Mapped to Parakeet
+INSERT INTO PetNeed VALUES ('Chew toys for teeth', 14); -- Mapped to Russian Blue (Kitten)
+INSERT INTO PetNeed VALUES ('Specialized seed mix', 15); -- Replaces 'Timothy hay' (Mapped to Finch)
+INSERT INTO PetNeed VALUES ('Joint supplements', 10);    -- Replaces 'Salt lick' (Mapped to Senior Poodle)
 
 INSERT INTO PetTemperment VALUES ('Overwhelmed when a lot of people in room', 2);
 INSERT INTO PetTemperment VALUES ('Very sociable', 1);
@@ -282,30 +259,23 @@ INSERT INTO Adoption VALUES (4, 6, '2025-02-05', 50.00, 'Email update weekly');
 INSERT INTO Adoption VALUES (5, 8, '2025-03-05', 300.00, 'Vet visit in 1 month');
 INSERT INTO Adoption VALUES (6, 9, '2025-03-25', 25.00, 'None');
 INSERT INTO Adoption VALUES (7, 10, '2025-04-08', 350.00, 'Call in 2 weeks');
-INSERT INTO Adoption VALUES (8, 12, '2025-05-05', 500.00, 'Home visit in 3 months');
-INSERT INTO Adoption VALUES (9, 13, '2025-05-20', 450.00, 'Photo update monthly');
-INSERT INTO Adoption VALUES (10, 14, '2025-06-05', 150.00, 'None');
-INSERT INTO Adoption VALUES (11, 15, '2025-06-25', 20.00, 'None');
-INSERT INTO Adoption VALUES (12, 17, '2025-07-20', 250.00, 'Vet records by Oct');
-INSERT INTO Adoption VALUES (13, 18, '2025-08-05', 100.00, 'None');
-INSERT INTO Adoption VALUES (14, 19, '2025-08-20', 75.00, 'None');
-INSERT INTO Adoption VALUES (15, 20, '2025-09-05', 400.00, 'Training class required');
 
-INSERT INTO Event VALUES (1, 104, '2020-03-13', INTERVAL '02:30:00' HOUR TO SECOND, 3, 'LAST DAY OF SCHOOL!', 6);
-INSERT INTO Event VALUES (2, 104, '2015-07-18', INTERVAL '16:30:00' HOUR TO SECOND, 2, 'Jamies Birthday!', 50);
-INSERT INTO Event VALUES (3, 104, '2023-05-01', INTERVAL '12:30:00' HOUR TO SECOND, 1, 'Adoption bonanza', 2);
-INSERT INTO Event VALUES (4, 109, '2025-01-15', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Puppy Yoga', 20);
-INSERT INTO Event VALUES (5, 113, '2025-02-14', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Valentines Mixer', 30);
-INSERT INTO Event VALUES (6, 104, '2025-03-17', INTERVAL '14:00:00' HOUR TO SECOND, 11, 'St Patricks Parade', 25);
-INSERT INTO Event VALUES (7, 109, '2025-04-20', INTERVAL '09:00:00' HOUR TO SECOND, 5, 'Kitten Cuddles', 15);
-INSERT INTO Event VALUES (8, 113, '2025-05-05', INTERVAL '17:00:00' HOUR TO SECOND, 15, 'Cinco de Mayo Party', 30);
-INSERT INTO Event VALUES (9, 104, '2025-06-21', INTERVAL '12:00:00' HOUR TO SECOND, 11, 'Summer Solstice Run', 20);
-INSERT INTO Event VALUES (10, 109, '2025-07-04', INTERVAL '20:00:00' HOUR TO SECOND, 15, 'Quiet Room (No Fireworks)', 20);
-INSERT INTO Event VALUES (11, 113, '2025-08-15', INTERVAL '15:00:00' HOUR TO SECOND, 5, 'Ice Cream Social', 15);
-INSERT INTO Event VALUES (12, 104, '2025-09-10', INTERVAL '11:00:00' HOUR TO SECOND, 15, 'Training 101', 10);
-INSERT INTO Event VALUES (13, 109, '2025-10-31', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Halloween Costume Contest', 30);
-INSERT INTO Event VALUES (14, 113, '2025-11-20', INTERVAL '13:00:00' HOUR TO SECOND, 5, 'Thanksgiving Feast', 20);
-INSERT INTO Event VALUES (15, 104, '2025-12-25', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Holiday Open House', 30);
+
+INSERT INTO Event VALUES (1, 104, '2020-03-13', INTERVAL '02:30:00' HOUR TO SECOND, 3, 'LAST DAY OF SCHOOL!', 6, TRUE);
+INSERT INTO Event VALUES (2, 104, '2015-07-18', INTERVAL '16:30:00' HOUR TO SECOND, 2, 'Jamies Birthday!', 50, TRUE);
+INSERT INTO Event VALUES (3, 104, '2023-05-01', INTERVAL '12:30:00' HOUR TO SECOND, 1, 'Adoption bonanza', 2, TRUE);
+INSERT INTO Event VALUES (4, 109, '2025-01-15', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Puppy Yoga', 20, FALSE);
+INSERT INTO Event VALUES (5, 113, '2025-02-14', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Valentines Mixer', 30, FALSE);
+INSERT INTO Event VALUES (6, 104, '2025-03-17', INTERVAL '14:00:00' HOUR TO SECOND, 11, 'St Patricks Parade', 25, FALSE);
+INSERT INTO Event VALUES (7, 109, '2025-04-20', INTERVAL '09:00:00' HOUR TO SECOND, 5, 'Kitten Cuddles', 15, FALSE);
+INSERT INTO Event VALUES (8, 113, '2025-05-05', INTERVAL '17:00:00' HOUR TO SECOND, 15, 'Cinco de Mayo Party', 30, FALSE);
+INSERT INTO Event VALUES (9, 104, '2025-06-21', INTERVAL '12:00:00' HOUR TO SECOND, 11, 'Summer Solstice Run', 20, FALSE);
+INSERT INTO Event VALUES (10, 109, '2025-07-04', INTERVAL '20:00:00' HOUR TO SECOND, 15, 'Quiet Room (No Fireworks)', 20, FALSE);
+INSERT INTO Event VALUES (11, 113, '2025-08-15', INTERVAL '15:00:00' HOUR TO SECOND, 5, 'Ice Cream Social', 15, FALSE);
+INSERT INTO Event VALUES (12, 104, '2025-09-10', INTERVAL '11:00:00' HOUR TO SECOND, 15, 'Training 101', 10, FALSE);
+INSERT INTO Event VALUES (13, 109, '2025-10-31', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Halloween Costume Contest', 30, FALSE);
+INSERT INTO Event VALUES (14, 113, '2025-11-20', INTERVAL '13:00:00' HOUR TO SECOND, 5, 'Thanksgiving Feast', 20, FALSE);
+INSERT INTO Event VALUES (15, 104, '2025-12-25', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Holiday Open House', 30, FALSE);
 
 INSERT INTO Booking VALUES (1, 1, 2, 'REG', TRUE, FALSE);
 INSERT INTO Booking VALUES (2, 1, 3, 'ATT', FALSE, FALSE);
