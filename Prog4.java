@@ -92,8 +92,11 @@ public class Prog4 {
                         new Menu("Void/Correct Entry", ()->{/**TODO: Req 5 (Logically Delete)*/}),
                     }),
                     new Menu("Adoptions").addSubMenu(new Menu[] {
-                        new Menu("Review Applications", ()->{/**TODO: Req 6 (Update - Approve/Reject)*/}),
-                        new Menu("Finalize Adoption", ()->{/**TODO: Update pet status/archive*/}),
+                        new Menu("Review Applications", ()->showAdoptApps()).addSubMenu(new Menu[] {
+                            new Menu("Approve", ()->approveAdoptApp()),
+                            new Menu("Reject", ()->rejectAdoptApp()),
+                        }),
+                        new Menu("Finalize Adoption", ()->finalizeAdoptApp()),
                     }),
                     new Menu("Events Management").addSubMenu(new Menu[] {
                         new Menu("View All Events", ()->listAllEvents()), 
@@ -338,7 +341,7 @@ public class Prog4 {
 
     public static void addPet() {
         try {
-            var stmt = DB.prepared("INSERT INTO Pet VALUES (pet_seq.NEXTVAL, ?, ?, ?, ?, ?, ? )", true);
+            var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(DB.uniqueId("Pet", "petId")), true);
             stmt.setString(1, Prompt.string("Animal Type", ""));
             stmt.setString(2, Prompt.stringNullable("Breed", null));
             stmt.setInt(3, Prompt.integer("Age", null));
@@ -401,6 +404,7 @@ public class Prog4 {
 
     public static void viewAdoptionAppsForPet() {
         try {
+            listPets();
             var id = Prompt.integer("ID of Pet you want to view applications for", null);
             var rs = DB.executeQuery("SELECT 1 FROM Pet WHERE petId = ?", id);
             if (!rs.next())
@@ -731,6 +735,7 @@ public class Prog4 {
     public static void listMyAdoptions(Boolean justApps){
         try {
             System.out.println("-- All Applications --");
+            try{
             DB.printQuery("""
                         SELECT a.appId as "ID",
                             p.name as "Name",
@@ -746,6 +751,9 @@ public class Prog4 {
                         WHERE a.memberNum = ? AND a.status NOT IN ('APP'%s)
                         ORDER BY a.appDate DESC
                     """.formatted(justApps ? ",'WIT'":""), ProgramContext.getUserId());
+            } catch (Exception e){
+                System.out.println("none.");
+            }
             if(justApps) return;
             System.out.println("-- All Adoptions --");
             try{
@@ -753,7 +761,7 @@ public class Prog4 {
                         SELECT p.adoptId as "ID",
                             p.name as "Name",
                             TO_CHAR(p.adoptDate, 'DY, MON DD, YYYY HH:MI AM') as "Adopt Date",
-                            p.fee as "Fee",
+                            p.fee as "Fee ($)",
                             p.followUpSchedule as "Follow Up Schedule"
                         FROM (AdoptionApp a JOIN Pet p USING (petId)) JOIN Adoption p USING (appId)
                         WHERE a.memberNum = ?
@@ -848,6 +856,61 @@ public class Prog4 {
                     Event WHERE canceled=TRUE AND eventDate > (CURRENT_DATE + 14)
                     """); // "well in advance is 14 days i think"
             DB.executeUpdate("DELETE FROM Event WHERE eventId=? AND canceled", Prompt.integer("Event ID", null));
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void showAdoptApps(){
+        try {
+            DB.printQuery("""
+                SELECT a.appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
+                p.name as "Pet Name", TO_CHAR(a.appDate, 'MM-dd-yyyy') as "App Date", a.status as "Status" 
+                FROM AdoptionApp a LEFT OUTER JOIN Member m USING (memberNum)
+                LEFT OUTER JOIN Staff e USING (empId)
+                LEFT OUTER JOIN Pet p USING (petId)
+                WHERE a.status NOT IN ('REJ', 'WIT', 'APP')
+                """);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void approveAdoptApp(){
+        try {
+            showAdoptApps();
+            DB.executeUpdate("UPDATE AdoptionApp SET status='APP' WHERE appId=?",Prompt.integer("Application ID", null));
+            ProgramContext.successMessage("Approved Application");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void rejectAdoptApp(){
+        try {
+            showAdoptApps();
+            DB.executeUpdate("UPDATE AdoptionApp SET status='REJ' WHERE appId=?",Prompt.integer("Application ID", null));
+            ProgramContext.successMessage("Rejected Application");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void finalizeAdoptApp(){
+        try {
+            DB.printQuery("""
+                SELECT a.appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
+                p.name as "Pet Name", TO_CHAR(a.appDate, 'MM-dd-yyyy') as "App Date"
+                FROM AdoptionApp a LEFT OUTER JOIN Member m USING (memberNum)
+                LEFT OUTER JOIN Staff e USING (empId)
+                LEFT OUTER JOIN Pet p USING (petId)
+                LEFT OUTER JOIN Adoption n using (appId)
+                WHERE a.status IN ('APP') AND n.adoptId IS NULL
+                """);
+            DB.executeUpdate("INSERT INTO Adoption VALUES (%d, ?, ?, ?, ?)"
+                .formatted(DB.uniqueId("Adoption", "adoptId")),
+                Prompt.integer("Application ID", null),
+                Prompt.date("Adoption Date", "MM-dd-yyyy", null),
+                Prompt.integer("Adoption Fee ($)", null),
+                Prompt.stringNullable("follow up schedule", null));
+            ProgramContext.successMessage("Finalized Adoption");
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
