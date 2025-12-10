@@ -353,9 +353,8 @@ public class Prog4 {
      */
     public static void registerMember() {
         try {
-            var rs = DB.execute("SELECT count(*) FROM Member");
-            rs.next();
-            var stmt = DB.prepared("INSERT INTO Member VALUES ( member_seq.NEXTVAL, ?, ?, ?, ?, ? )", true);
+            var id = DB.uniqueId("Member", "memberNum");
+            var stmt = DB.prepared("INSERT INTO Member VALUES ( %d, ?, ?, ?, ?, ? )".formatted(id), true);
             stmt.setString(1, Prompt.string("Name", ""));
             stmt.setString(2, Prompt.string("Phone", ""));
             stmt.setString(3, Prompt.string("Email", ""));
@@ -365,19 +364,11 @@ public class Prog4 {
                 inp = "NOT CURRENTLY MEMBER";
             }
             inp = inp.toUpperCase();
-            // if (inp != null && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
-            //     throw new RuntimeException("Selected tier does not exist.");
             stmt.setString(5, inp);
             stmt.executeUpdate();
             var keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                int id = keys.getInt(1);
-                DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", id, inp);
-                ProgramContext.successMessage("Successfully registered user with ID: %d!".formatted(id));
-            } else {
-                ProgramContext.failureMessage("Failed to retrieve Member ID!");
-            }
-
+            DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", id, inp);
+            ProgramContext.successMessage("Successfully registered user with ID: %d!".formatted(id));
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
@@ -757,7 +748,7 @@ public class Prog4 {
      */
     public static void bookReservation() {
         try {
-            String resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null).toString();
+            var resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null);
             String timeSlot = Prompt.time("Time Slot Duration", "HH:mm").toString();
             var rs = DB.execute("SELECT count(*) FROM Reservation");
             rs.next();
