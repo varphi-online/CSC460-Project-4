@@ -1,623 +1,294 @@
--- INSERT INTO Animals VALUES (
--- 	'CAT'
--- );
-
--- INSERT INTO Animals VALUES (
--- 	'BIRD'
--- );
-
--- INSERT INTO Animals VALUES (
--- 	'DOG'
--- );
-
-INSERT INTO Room VALUES (
-	1,
-	12
-);
-
-INSERT INTO Room VALUES (
-	2,
-	8
-);
-
-INSERT INTO Room VALUES (
-	3,
-	8
-);
-
-INSERT INTO Room VALUES (
-	4,
-	5
-);
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'DOG',
-	'Silver labrador',
-	7,
-	'2018-05-14',
-	TRUE,
-	'Duke'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'BIRD',
-	'Chinese Goose',
-	4,
-	'2021-08-15',
-	FALSE,
-	'Empress'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'CAT',
-	'Persian Cat',
-	3,
-	'2022-11-05',
-	TRUE,
-	'Ms. Whiskers'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'DOG',
-	'Golden Retriever',
-	5,
-	'2020-06-10',
-	TRUE,
-	'Buddy'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'CAT',
-	'Siamese',
-	2,
-	'2023-01-20',
-	TRUE,
-	'Luna'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'BIRD',
-	'Cockatiel',
-	1,
-	'2024-03-05',
-	TRUE,
-	'Sunny'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'DOG',
-	'Beagle',
-	6,
-	'2019-09-12',
-	FALSE,
-	'Charlie'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'CAT',
-	'Maine Coon',
-	4,
-	'2021-11-30',
-	TRUE,
-	'Leo'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'BIRD',
-	'Parakeet',
-	2,
-	'2022-07-18',
-	TRUE,
-	'Kiwi'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'DOG',
-	'Poodle',
-	8,
-	'2016-04-22',
-	FALSE,
-	'Bella'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'CAT',
-	'Bengal',
-	5,
-	'2019-05-14',
-	TRUE,
-	'Tiger'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'BIRD',
-	'Macaw',
-	3,
-	'2021-12-01',
-	FALSE,
-	'Rio'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'DOG',
-	'Shih Tzu',
-	2,
-	'2023-08-09',
-	TRUE,
-	'Max'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'CAT',
-	'Russian Blue',
-	1,
-	'2024-02-15',
-	TRUE,
-	'Smokey'
-);
-
-INSERT INTO Pet VALUES (
-	pet_seq.NEXTVAL,
-	'BIRD',
-	'Finch',
-	4,
-	'2020-10-25',
-	TRUE,
-	'Peep'
-);
-
-INSERT INTO PetNeed VALUES (
-	'Food 3 times a day',
-	1
-);
-
-INSERT INTO PetNeed VALUES (
-	'Bath twice a month',
-	2
-);
-
-INSERT INTO PetNeed VALUES (
-	'Alone Time 1 hour/week',
-	3
-);
-
-INSERT INTO PetTemperment VALUES (
-	'Overwhelmed when a lot of people in room',
-	2
-);
-
-INSERT INTO PetTemperment VALUES (
-	'Very sociable',
-	1
-);
-
-INSERT INTO PetTemperment VALUES (
-	'does not play but will hang out',
-	3
-);
-
-INSERT INTO Area VALUES (
-	1,
-	1,
-	'CAT',
-	TRUE
-);
-
-INSERT INTO Area VALUES (
-	2,
-	1,
-	'DOG',
-	TRUE
-);
-
-INSERT INTO Area VALUES (
-	1,
-	2,
-	'BIRD',
-	FALSE
-);
-
-INSERT INTO Area VALUES (
-	1,
-	3,
-	'DOG',
-	TRUE
-);
-
-INSERT INTO Area VALUES (
-	1,
-	4,
-	'CAT',
-	FALSE
-);
-
-INSERT INTO PetRoomHistory VALUES (
-	1,
-	2,
-	1,
-	'2025-04-16',
-	'2025-04-16'
-);
-
-INSERT INTO PetRoomHistory VALUES (
-	3,
-	1,
-	1,
-	'2025-11-19',
-	'2025-11-19'
-);
-
-INSERT INTO PetRoomHistory VALUES (
-	2,
-	2,
-	1,
-	'2025-04-17',
-	'2025-04-17'
-);
-
-
-INSERT INTO Member VALUES (
-	member_seq.NEXTVAL,
-	'John Wayne',
-	'415-456-3028',
-	'johnW@yahoo.com',
-	'1994-03-16',
-	'SILVER'
-);
-
-INSERT INTO Member VALUES (
-	member_seq.NEXTVAL,
-	'Emily Barker',
-	'925-488-2415',
-	'emmy4@gmail.com',
-	'2001-08-25',
-	'BRONZE'
-);
-
-INSERT INTO Member VALUES (
-	member_seq.NEXTVAL,
-	'Justin Lakes',
-	'713-331-8703',
-	'thisjustin@gmail.com',
-	'2000-02-05',
-	'GOLD'
-);
-
-INSERT INTO MemberHistory VALUES (
-	3,
-	'2024-11-07',
-	'2024-12-07',
-	'SILVER'
-);
-
-INSERT INTO MemberHistory VALUES (
-	3,
-	'2024-12-08',
-	'2025-12-08',
-	'GOLD'
-);
-
-INSERT INTO MemberHistory VALUES (
-	2,
-	'2025-04-16',
-	'2025-04-17',
-	'BRONZE'
-);
-
-INSERT INTO MemberHistory VALUES (
-	1,
-	'2025-11-19',
-	'2025-12-20',
-	'SILVER'
-);
-
-INSERT INTO EmergencyContact VALUES (
-	1,
-	1,
-	'Criss Wayne',
-	'675-204-1242',
-	'crissw@gmail.com'
-);
-
-INSERT INTO EmergencyContact VALUES (
-	2,
-	2,
-	'Jeff Baker',
-	'968-246-9275',
-	'jefferyb@yahoo.com'
-);
-
-INSERT INTO EmergencyContact VALUES (
-	3,
-	3,
-	'Sandra Locks',
-	'415-785-2034',
-	'sandral@gmail.com'
-);
-
-INSERT INTO Reservation VALUES (
-	1,
-	3,
-	2,
-	'2025-04-16',
-	INTERVAL '03:00:00' HOUR TO SECOND,
-	'YES',
-	'YES'
-);
-
-INSERT INTO Reservation VALUES (
-	2,
-	1,
-	2,
-	'25-11-19',
-	INTERVAL '02:00:00' HOUR TO SECOND,
-	'YES',
-	'YES'
-);
-
-INSERT INTO Reservation VALUES (
-	3,
-	2,
-	3,
-	'25-04-17',
-	INTERVAL '01:30:00' HOUR TO SECOND,
-	'NO',
-	'NO'
-);
-
-INSERT INTO FoodOrder VALUES ( -- Needs to be changed when coming up with discount
-	1,
-	3,
-	1,
-	'2025-04-16',
-	9.50,
-	TRUE
-);
-
-INSERT INTO FoodOrder VALUES ( -- same as above
-	2,
-	1,
-	2,
-	'25-11-19',
-	5.00,
-	FALSE
-);
-
-INSERT INTO Item VALUES (
-	1,
-	1.50,
-	'Water'
-);
-
-INSERT INTO Item VALUES (
-	2,
-	8.00,
-	'Burger with fries'
-);
-
-INSERT INTO Item VALUES (
-	3,
-	5.00,
-	'Ham Sandwitch'
-); 
-
-INSERT INTO OrderItem VALUES (
-	1,
-	1,
-	3
-);
-
-INSERT INTO OrderItem VALUES (
-	1,
-	3,
-	1
-);
-
-INSERT INTO OrderItem VALUES (
-	2,
-	2,
-	1
-);
-
-INSERT INTO Staff VALUES (
-	100,
-	'Charles Darwin',
-	'MGR'
-);
-
-INSERT INTO Staff VALUES (
-	101,
-	'Alexa Levy',
-	'VET'
-);
-
-INSERT INTO Staff VALUES (
-	102,
-	'Ariel Lamb',
-	'BAR'
-);
-
-INSERT INTO Staff VALUES (
-	103,
-	'Jon Gray',
-	'HDL'
-);
-
-INSERT INTO Staff VALUES (
-	104,
-	'Wayne Lamb',
-	'CRD'
-);
-
-INSERT INTO HealthRecord VALUES (
-	1,
-	1,
-	'insert',
-	'2018-05-14',
-	1,
-	102,
-	'CHK',
-	'Everything is good!',
-	NULL,
-	'Healthy'
-);
-
-INSERT INTO HealthRecord VALUES (
-	2,
-	1,
-	'insert',
-	'2021-08-15',
-	2,
-	102,
-	'CHK',
-	'Hurt Wing',
-	'2021-08-22',
-	'Injured'
-);
-
-INSERT INTO HealthRecord VALUES (
-	3,
-	2,
-	'update',
-	'2021-08-22',
-	2,
-	101,
-	'VET',
-	'Bird is doing well now',
-	NULL,
-	'Healthy'
-);
-
-INSERT INTO HealthRecord VALUES (
-	4,
-	1,
-	'insert',
-	'2022-11-05',
-	3,
-	102,
-	'CHK',
-	'Everything is good!',
-	NULL,
-	'Healthy'
-);
-
-INSERT INTO AdoptionApp VALUES (
-	1,
-	2,
-	103,
-	3,
-	'2023-12-01',
-	'PEN'
-);
-
-INSERT INTO AdoptionApp VALUES (
-	2,
-	2,
-	103,
-	2,
-	'2008-05-06',
-	'REJ'
-);
-
-INSERT INTO AdoptionApp VALUES (
-	3,
-	1,
-	103,
-	1,
-	'2025-12-02',
-	'APP'
-);
-
-INSERT INTO Adoption VALUES (
-	1,
-	1,
-	'2024-01-03',
-	200.00,
-	'Once a month for the first 6 mos.'
-);
-
-INSERT INTO Adoption VALUES (
-	2,
-	3,
-	NULL, -- hasnt happened yet
-	400.00,
-	'Once a month for the first 6 mos.'
-);
-
-INSERT INTO Adoption VALUES (
-	3,
-	2,
-	'2008-05-27',
-	10.00,
-	'Once a month for the first 6 mos.'
-);
-
-INSERT INTO Event VALUES (
-	1,
-	104,
-	'2020-03-13',
-	'02:30:00' HOUR TO SECOND,
-	3,
-	'LAST DAY OF SCHOOL!',
-	6
-);
-
-INSERT INTO Event VALUES (
-	2,
-	104,
-	'2015-07-18',
-	'16:30:00' HOUR TO SECOND,
-	2,
-	'Jamies Birthday!',
-	50
-);
-
-INSERT INTO Event VALUES (
-	3,
-	104,
-	'2023-05-01',
-	'12:30:00' HOUR TO SECOND,
-	1,
-	'Adoption bonanza',
-	2
-);
-
-INSERT INTO Booking VALUES (
-	1,
-	1,
-	2,
-	'REG',
-	TRUE,
-	FALSE
-);
-
-INSERT INTO Booking VALUES (
-	2,
-	1,
-	3,
-	'ATT',
-	FALSE,
-	FALSE
-);
-
-INSERT INTO Booking VALUES (
-	3,
-	2,
-	2,
-	'CAN',
-	TRUE,
-	TRUE
-);
+INSERT INTO Room VALUES (1, 12);
+INSERT INTO Room VALUES (2, 8);
+INSERT INTO Room VALUES (3, 8);
+INSERT INTO Room VALUES (4, 5);
+INSERT INTO Room VALUES (5, 20);
+INSERT INTO Room VALUES (6, 10);
+INSERT INTO Room VALUES (7, 4);
+INSERT INTO Room VALUES (8, 6);
+INSERT INTO Room VALUES (9, 15);
+INSERT INTO Room VALUES (10, 2);
+INSERT INTO Room VALUES (11, 25);
+INSERT INTO Room VALUES (12, 10);
+INSERT INTO Room VALUES (13, 8);
+INSERT INTO Room VALUES (14, 5);
+INSERT INTO Room VALUES (15, 30); 
+
+INSERT INTO Pet VALUES (1, 'DOG', 'Silver labrador', 7, '2018-05-14', TRUE, 'Duke');
+INSERT INTO Pet VALUES (2, 'BIRD', 'Chinese Goose', 4, '2021-08-15', FALSE, 'Empress');
+INSERT INTO Pet VALUES (3, 'CAT', 'Persian Cat', 3, '2022-11-05', TRUE, 'Ms. Whiskers');
+INSERT INTO Pet VALUES (4, 'DOG', 'Golden Retriever', 5, '2020-06-10', TRUE, 'Buddy');
+INSERT INTO Pet VALUES (5, 'CAT', 'Siamese', 2, '2023-01-20', TRUE, 'Luna');
+INSERT INTO Pet VALUES (6, 'BIRD', 'Cockatiel', 1, '2024-03-05', TRUE, 'Sunny');
+INSERT INTO Pet VALUES (7, 'DOG', 'Beagle', 6, '2019-09-12', FALSE, 'Charlie');
+INSERT INTO Pet VALUES (8, 'CAT', 'Maine Coon', 4, '2021-11-30', TRUE, 'Leo');
+INSERT INTO Pet VALUES (9, 'BIRD', 'Parakeet', 2, '2022-07-18', TRUE, 'Kiwi');
+INSERT INTO Pet VALUES (10, 'DOG', 'Poodle', 8, '2016-04-22', FALSE, 'Bella');
+INSERT INTO Pet VALUES (11, 'CAT', 'Bengal', 5, '2019-05-14', TRUE, 'Tiger');
+INSERT INTO Pet VALUES (12, 'BIRD', 'Macaw', 3, '2021-12-01', FALSE, 'Rio');
+INSERT INTO Pet VALUES (13, 'DOG', 'Shih Tzu', 2, '2023-08-09', TRUE, 'Max');
+INSERT INTO Pet VALUES (14, 'CAT', 'Russian Blue', 1, '2024-02-15', TRUE, 'Smokey');
+INSERT INTO Pet VALUES (15, 'BIRD', 'Finch', 4, '2020-10-25', TRUE, 'Peep');
+
+INSERT INTO PetNeed VALUES ('Food 3 times a day', 3);  -- Mapped to Cat
+INSERT INTO PetNeed VALUES ('Bath twice a month', 1);  -- Mapped to Dog
+INSERT INTO PetNeed VALUES ('Alone Time 1 hour/week', 2); -- Mapped to Bird
+INSERT INTO PetNeed VALUES ('Fresh veggies daily', 6); -- Mapped to Cockatiel
+INSERT INTO PetNeed VALUES ('UVB Lighting', 9);       -- Mapped to Parakeet
+INSERT INTO PetNeed VALUES ('Chew toys for teeth', 14); -- Mapped to Russian Blue (Kitten)
+INSERT INTO PetNeed VALUES ('Specialized seed mix', 15); -- Replaces 'Timothy hay' (Mapped to Finch)
+INSERT INTO PetNeed VALUES ('Joint supplements', 10);    -- Replaces 'Salt lick' (Mapped to Senior Poodle)
+
+INSERT INTO PetTemperment VALUES ('Overwhelmed when a lot of people in room', 2);
+INSERT INTO PetTemperment VALUES ('Very sociable', 1);
+INSERT INTO PetTemperment VALUES ('does not play but will hang out', 3);
+INSERT INTO PetTemperment VALUES ('Loves to play fetch', 4);
+INSERT INTO PetTemperment VALUES ('Hides under furniture', 5);
+INSERT INTO PetTemperment VALUES ('Sings loudly in the morning', 6);
+INSERT INTO PetTemperment VALUES ('Food aggressive', 7);
+INSERT INTO PetTemperment VALUES ('Gentle giant', 8);
+INSERT INTO PetTemperment VALUES ('Nips fingers', 9);
+INSERT INTO PetTemperment VALUES ('Anxious around other dogs', 10);
+INSERT INTO PetTemperment VALUES ('Very energetic and climbs', 11);
+INSERT INTO PetTemperment VALUES ('Mimics speech', 12);
+INSERT INTO PetTemperment VALUES ('Lap dog', 13);
+INSERT INTO PetTemperment VALUES ('Shy at first', 14);
+INSERT INTO PetTemperment VALUES ('Flies around constantly', 15);
+
+INSERT INTO Area VALUES (1, 1, 'CAT', TRUE);
+INSERT INTO Area VALUES (2, 1, 'DOG', TRUE);
+INSERT INTO Area VALUES (1, 2, 'BIRD', FALSE);
+INSERT INTO Area VALUES (1, 3, 'DOG', TRUE);
+INSERT INTO Area VALUES (1, 4, 'CAT', FALSE);
+INSERT INTO Area VALUES (1, 5, 'DOG', TRUE);
+INSERT INTO Area VALUES (2, 5, 'DOG', TRUE);
+INSERT INTO Area VALUES (1, 6, 'RABBIT', TRUE);
+INSERT INTO Area VALUES (1, 7, 'SNAKE', FALSE);
+INSERT INTO Area VALUES (1, 8, 'LIZARD', FALSE);
+INSERT INTO Area VALUES (1, 9, 'CAT', TRUE);
+INSERT INTO Area VALUES (1, 10, 'DOG', FALSE); -- Iso
+INSERT INTO Area VALUES (1, 11, 'DOG', TRUE);
+INSERT INTO Area VALUES (1, 12, 'HAMSTER', TRUE);
+INSERT INTO Area VALUES (1, 13, 'GUINEA PIG', TRUE);
+
+INSERT INTO PetRoomHistory VALUES (1, 2, 1, '2025-04-16', '2025-04-16');
+INSERT INTO PetRoomHistory VALUES (3, 1, 1, '2025-11-19', '2025-11-19');
+INSERT INTO PetRoomHistory VALUES (2, 2, 1, '2025-04-17', '2025-04-17');
+INSERT INTO PetRoomHistory VALUES (4, 5, 1, '2025-01-10', '2025-01-12');
+INSERT INTO PetRoomHistory VALUES (5, 4, 1, '2025-02-20', '2025-02-20');
+INSERT INTO PetRoomHistory VALUES (6, 2, 1, '2025-03-01', '2025-03-05');
+INSERT INTO PetRoomHistory VALUES (7, 3, 1, '2024-12-01', '2024-12-02');
+INSERT INTO PetRoomHistory VALUES (8, 9, 1, '2025-05-15', '2025-05-16');
+INSERT INTO PetRoomHistory VALUES (9, 2, 1, '2025-06-10', '2025-06-10');
+INSERT INTO PetRoomHistory VALUES (10, 10, 1, '2024-11-20', '2024-11-25');
+INSERT INTO PetRoomHistory VALUES (11, 1, 1, '2025-07-04', '2025-07-04');
+INSERT INTO PetRoomHistory VALUES (12, 2, 1, '2025-08-15', '2025-08-20');
+INSERT INTO PetRoomHistory VALUES (13, 5, 2, '2025-09-01', '2025-09-01');
+INSERT INTO PetRoomHistory VALUES (14, 4, 1, '2025-10-10', '2025-10-12');
+INSERT INTO PetRoomHistory VALUES (15, 2, 1, '2025-01-01', '2025-01-02');
+
+INSERT INTO Member VALUES (1, 'John Wayne', '415-456-3028', 'johnW@yahoo.com', '1994-03-16', 'SILVER');
+INSERT INTO Member VALUES (2, 'Emily Barker', '925-488-2415', 'emmy4@gmail.com', '2001-08-25', 'BRONZE');
+INSERT INTO Member VALUES (3, 'Justin Lakes', '713-331-8703', 'thisjustin@gmail.com', '2000-02-05', 'GOLD');
+INSERT INTO Member VALUES (4, 'Sarah Connor', '555-123-4567', 'sconnor@skynet.net', '1985-11-12', 'GOLD');
+INSERT INTO Member VALUES (5, 'Bruce Wayne', '555-999-0000', 'bman@wayne.ent', '1980-02-19', 'GOLD');
+INSERT INTO Member VALUES (6, 'Clark Kent', '555-333-2222', 'superck@daily.pl', '1988-06-18', 'SILVER');
+INSERT INTO Member VALUES (7, 'Diana Prince', '555-444-5555', 'wwoman@gmail.com', '1990-01-01', 'GOLD');
+INSERT INTO Member VALUES (8, 'Peter Parker', '555-666-7777', 'spidey@queens.ny', '2001-08-10', 'BRONZE');
+INSERT INTO Member VALUES (9, 'Tony Stark', '555-888-9999', 'ironman@stark.ind', '1975-05-29', 'GOLD');
+INSERT INTO Member VALUES (10, 'Steve Rogers', '555-111-2222', 'cap@shield.gov', '1918-07-04', 'SILVER');
+INSERT INTO Member VALUES (11, 'Natasha Romanoff', '555-000-1111', 'widow@shield.gov', '1984-11-22', 'GOLD');
+INSERT INTO Member VALUES (12, 'Bruce Banner', '555-222-3333', 'hulk@science.lab', '1978-12-18', 'BRONZE');
+INSERT INTO Member VALUES (13, 'Wanda Maximoff', '555-777-8888', 'witch@magic.net', '1995-03-01', 'SILVER');
+INSERT INTO Member VALUES (14, 'Vision', '555-444-9999', 'viz@android.net', '2015-05-01', 'GOLD');
+INSERT INTO Member VALUES (15, 'Thor Odinson', '555-THO-R000', 'godofthunder@asgard.gov', '1000-01-01', 'GOLD');
+
+INSERT INTO MemberHistory VALUES (3, '2024-11-07', '2024-12-07', 'SILVER');
+INSERT INTO MemberHistory VALUES (3, '2024-12-08', '2025-12-08', 'GOLD');
+INSERT INTO MemberHistory VALUES (2, '2025-04-16', '2025-04-17', 'BRONZE');
+INSERT INTO MemberHistory VALUES (1, '2025-11-19', '2025-12-20', 'SILVER');
+INSERT INTO MemberHistory VALUES (4, '2023-01-01', '2024-01-01', 'SILVER');
+INSERT INTO MemberHistory VALUES (4, '2024-01-02', '2025-01-02', 'GOLD');
+INSERT INTO MemberHistory VALUES (5, '2020-05-20', '2021-05-20', 'GOLD');
+INSERT INTO MemberHistory VALUES (6, '2022-06-01', '2023-06-01', 'BRONZE');
+INSERT INTO MemberHistory VALUES (7, '2023-08-15', '2024-08-15', 'SILVER');
+INSERT INTO MemberHistory VALUES (8, '2024-09-01', '2025-09-01', 'BRONZE');
+INSERT INTO MemberHistory VALUES (9, '2021-03-10', '2022-03-10', 'GOLD');
+INSERT INTO MemberHistory VALUES (10, '2022-07-04', '2023-07-04', 'SILVER');
+INSERT INTO MemberHistory VALUES (11, '2023-11-15', '2024-11-15', 'GOLD');
+INSERT INTO MemberHistory VALUES (12, '2024-02-01', '2025-02-01', 'BRONZE');
+INSERT INTO MemberHistory VALUES (13, '2024-10-31', '2025-10-31', 'SILVER');
+
+INSERT INTO EmergencyContact VALUES (1, 1, 'Criss Wayne', '675-204-1242', 'crissw@gmail.com');
+INSERT INTO EmergencyContact VALUES (2, 2, 'Jeff Baker', '968-246-9275', 'jefferyb@yahoo.com');
+INSERT INTO EmergencyContact VALUES (3, 3, 'Sandra Locks', '415-785-2034', 'sandral@gmail.com');
+INSERT INTO EmergencyContact VALUES (4, 4, 'Kyle Reese', '555-987-6543', 'kreese@resistance.org');
+INSERT INTO EmergencyContact VALUES (5, 5, 'Alfred Pennyworth', '555-123-9876', 'alfred@wayne.ent');
+INSERT INTO EmergencyContact VALUES (6, 6, 'Lois Lane', '555-321-6549', 'llane@daily.pl');
+INSERT INTO EmergencyContact VALUES (7, 7, 'Hippolyta', '000-000-0001', 'queen@themyscira.gov');
+INSERT INTO EmergencyContact VALUES (8, 8, 'May Parker', '555-654-3210', 'may@queens.ny');
+INSERT INTO EmergencyContact VALUES (9, 9, 'Pepper Potts', '555-456-7890', 'pepper@stark.ind');
+INSERT INTO EmergencyContact VALUES (10, 10, 'Bucky Barnes', '555-111-3333', 'winters@hydra.bad');
+INSERT INTO EmergencyContact VALUES (11, 11, 'Nick Fury', '555-999-8888', 'fury@shield.gov');
+INSERT INTO EmergencyContact VALUES (12, 12, 'Betty Ross', '555-777-6666', 'betty@uni.edu');
+INSERT INTO EmergencyContact VALUES (13, 13, 'Pietro Maximoff', '555-222-8888', 'quicks@speed.net');
+INSERT INTO EmergencyContact VALUES (14, 14, 'Tony Stark', '555-888-9999', 'ironman@stark.ind');
+INSERT INTO EmergencyContact VALUES (15, 15, 'Loki Laufeyson', '555-LOK-I000', 'mischief@asgard.gov');
+
+INSERT INTO Staff VALUES (100, 'Charles Darwin', 'MGR');
+INSERT INTO Staff VALUES (101, 'Alexa Levy', 'VET');
+INSERT INTO Staff VALUES (102, 'Ariel Lamb', 'BAR');
+INSERT INTO Staff VALUES (103, 'Jon Gray', 'HDL');
+INSERT INTO Staff VALUES (104, 'Wayne Lamb', 'CRD');
+INSERT INTO Staff VALUES (105, 'Jane Goodall', 'VET');
+INSERT INTO Staff VALUES (106, 'Steve Irwin', 'HDL');
+INSERT INTO Staff VALUES (107, 'Cesar Millan', 'HDL');
+INSERT INTO Staff VALUES (108, 'Jackson Galaxy', 'HDL');
+INSERT INTO Staff VALUES (109, 'Temple Grandin', 'CRD');
+INSERT INTO Staff VALUES (110, 'Dolittle', 'VET');
+INSERT INTO Staff VALUES (111, 'Ace Ventura', 'HDL');
+INSERT INTO Staff VALUES (112, 'Gordon Ramsay', 'BAR');
+INSERT INTO Staff VALUES (113, 'Snoop Dogg', 'CRD');
+INSERT INTO Staff VALUES (114, 'Betty White', 'MGR');
+
+INSERT INTO Reservation VALUES (1, 3, 2, '2025-04-16', INTERVAL '03:00:00' HOUR TO SECOND, 'YES', 'YES');
+INSERT INTO Reservation VALUES (2, 1, 2, '2025-11-19', INTERVAL '02:00:00' HOUR TO SECOND, 'YES', 'YES');
+INSERT INTO Reservation VALUES (3, 2, 3, '2025-04-17', INTERVAL '01:30:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (4, 4, 5, '2025-01-10', INTERVAL '01:00:00' HOUR TO SECOND, 'YES', 'YES');
+INSERT INTO Reservation VALUES (5, 5, 15, '2025-02-20', INTERVAL '04:00:00' HOUR TO SECOND, 'YES', 'YES');
+INSERT INTO Reservation VALUES (6, 6, 1, '2025-03-15', INTERVAL '02:00:00' HOUR TO SECOND, 'YES', 'NO');
+INSERT INTO Reservation VALUES (7, 7, 11, '2025-06-01', INTERVAL '03:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (8, 8, 5, '2025-07-20', INTERVAL '02:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (9, 9, 10, '2025-08-05', INTERVAL '01:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (10, 10, 4, '2025-09-10', INTERVAL '01:30:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (11, 11, 2, '2025-10-15', INTERVAL '02:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (12, 12, 3, '2025-11-01', INTERVAL '01:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (13, 13, 6, '2025-12-05', INTERVAL '02:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (14, 14, 1, '2026-01-10', INTERVAL '03:00:00' HOUR TO SECOND, 'NO', 'NO');
+INSERT INTO Reservation VALUES (15, 15, 5, '2026-02-14', INTERVAL '04:00:00' HOUR TO SECOND, 'NO', 'NO');
+
+INSERT INTO Item VALUES (1, 1.50, 'Water');
+INSERT INTO Item VALUES (2, 8.00, 'Burger with fries');
+INSERT INTO Item VALUES (3, 5.00, 'Ham Sandwich');
+INSERT INTO Item VALUES (4, 2.50, 'Coffee');
+INSERT INTO Item VALUES (5, 3.00, 'Latte');
+INSERT INTO Item VALUES (6, 2.00, 'Tea');
+INSERT INTO Item VALUES (7, 4.00, 'Muffin');
+INSERT INTO Item VALUES (8, 1.00, 'Dog Treat');
+INSERT INTO Item VALUES (9, 1.50, 'Cat Nip');
+INSERT INTO Item VALUES (10, 10.00, 'Salad');
+INSERT INTO Item VALUES (11, 12.00, 'Pizza');
+INSERT INTO Item VALUES (12, 3.50, 'Bagel');
+INSERT INTO Item VALUES (13, 4.50, 'Smoothie');
+INSERT INTO Item VALUES (14, 2.50, 'Soda');
+INSERT INTO Item VALUES (15, 6.00, 'Wrap');
+
+INSERT INTO FoodOrder VALUES (1, 3, 1, '2025-04-16', 9.50, TRUE);
+INSERT INTO FoodOrder VALUES (2, 1, 2, '2025-11-19', 5.00, FALSE);
+INSERT INTO FoodOrder VALUES (3, 4, 4, '2025-01-10', 12.00, TRUE);
+INSERT INTO FoodOrder VALUES (4, 5, 5, '2025-02-20', 25.00, TRUE);
+INSERT INTO FoodOrder VALUES (5, 6, 6, '2025-03-15', 8.50, TRUE);
+INSERT INTO FoodOrder VALUES (6, 7, 7, '2025-06-01', 15.00, FALSE);
+INSERT INTO FoodOrder VALUES (7, 8, 8, '2025-07-20', 10.00, TRUE);
+INSERT INTO FoodOrder VALUES (8, 9, 9, '2025-08-05', 20.00, TRUE);
+INSERT INTO FoodOrder VALUES (9, 10, 10, '2025-09-10', 5.50, FALSE);
+INSERT INTO FoodOrder VALUES (10, 11, 11, '2025-10-15', 9.00, TRUE);
+INSERT INTO FoodOrder VALUES (11, 12, 12, '2025-11-01', 7.50, TRUE);
+INSERT INTO FoodOrder VALUES (12, 13, 13, '2025-12-05', 18.00, FALSE);
+INSERT INTO FoodOrder VALUES (13, 14, 14, '2026-01-10', 22.00, TRUE);
+INSERT INTO FoodOrder VALUES (14, 15, 15, '2026-02-14', 30.00, TRUE);
+INSERT INTO FoodOrder VALUES (15, 3, 1, '2025-04-16', 3.00, TRUE);
+
+INSERT INTO OrderItem VALUES (1, 1, 3);
+INSERT INTO OrderItem VALUES (1, 3, 1);
+INSERT INTO OrderItem VALUES (2, 2, 1);
+INSERT INTO OrderItem VALUES (3, 11, 1);
+INSERT INTO OrderItem VALUES (4, 11, 2);
+INSERT INTO OrderItem VALUES (4, 14, 2);
+INSERT INTO OrderItem VALUES (5, 5, 1);
+INSERT INTO OrderItem VALUES (5, 7, 1);
+INSERT INTO OrderItem VALUES (6, 15, 2);
+INSERT INTO OrderItem VALUES (7, 2, 1);
+INSERT INTO OrderItem VALUES (8, 11, 1);
+INSERT INTO OrderItem VALUES (8, 2, 1);
+INSERT INTO OrderItem VALUES (9, 13, 1);
+INSERT INTO OrderItem VALUES (10, 15, 1);
+INSERT INTO OrderItem VALUES (11, 4, 2);
+
+INSERT INTO HealthRecord VALUES (1, 1, 'insert', '2018-05-14', 1, 102, 'CHK', 'Everything is good!', NULL, 'Healthy');
+INSERT INTO HealthRecord VALUES (2, 1, 'insert', '2021-08-15', 2, 102, 'CHK', 'Hurt Wing', '2021-08-22', 'Injured');
+INSERT INTO HealthRecord VALUES (3, 2, 'update', '2021-08-22', 2, 101, 'VET', 'Bird is doing well now', NULL, 'Healthy');
+INSERT INTO HealthRecord VALUES (4, 1, 'insert', '2022-11-05', 3, 102, 'CHK', 'Everything is good!', NULL, 'Healthy');
+INSERT INTO HealthRecord VALUES (5, 1, 'insert', '2025-01-01', 4, 101, 'VET', 'Annual vaccination', '2026-01-01', 'Healthy');
+INSERT INTO HealthRecord VALUES (6, 1, 'insert', '2025-02-15', 5, 103, 'GRM', 'Nail trim', '2025-03-15', 'Good');
+INSERT INTO HealthRecord VALUES (7, 1, 'insert', '2025-03-10', 6, 101, 'VET', 'Beak trim', '2025-09-10', 'Healthy');
+INSERT INTO HealthRecord VALUES (8, 1, 'insert', '2025-04-05', 7, 105, 'VET', 'Ear infection check', '2025-04-12', 'Sick');
+INSERT INTO HealthRecord VALUES (9, 1, 'insert', '2025-05-20', 8, 103, 'GRM', 'Fur dematting', NULL, 'Good');
+INSERT INTO HealthRecord VALUES (10, 1, 'insert', '2025-06-01', 9, 101, 'VET', 'Wing clip', '2025-12-01', 'Healthy');
+INSERT INTO HealthRecord VALUES (11, 1, 'insert', '2025-06-15', 10, 105, 'VET', 'Dental cleaning', '2026-06-15', 'Healthy');
+INSERT INTO HealthRecord VALUES (12, 1, 'insert', '2025-07-01', 11, 102, 'BHN', 'Aggressive behavior', NULL, 'Watch');
+INSERT INTO HealthRecord VALUES (13, 1, 'insert', '2025-07-20', 12, 101, 'VET', 'Feather plucking check', NULL, 'Stressed');
+INSERT INTO HealthRecord VALUES (14, 1, 'insert', '2025-08-05', 13, 105, 'VET', 'Eye exam', NULL, 'Healthy');
+INSERT INTO HealthRecord VALUES (15, 1, 'insert', '2025-09-10', 14, 103, 'GRM', 'Full bath', NULL, 'Clean');
+
+INSERT INTO AdoptionApp VALUES (1, 2, 103, 3, '2023-12-01', 'PEN');
+INSERT INTO AdoptionApp VALUES (2, 2, 103, 2, '2008-05-06', 'REJ');
+INSERT INTO AdoptionApp VALUES (3, 1, 103, 1, '2025-12-02', 'APP');
+INSERT INTO AdoptionApp VALUES (4, 3, 103, 4, '2025-01-05', 'APP');
+INSERT INTO AdoptionApp VALUES (5, 4, 103, 5, '2025-01-10', 'APP');
+INSERT INTO AdoptionApp VALUES (6, 5, 103, 6, '2025-02-01', 'APP');
+INSERT INTO AdoptionApp VALUES (7, 6, 103, 7, '2025-02-15', 'REJ');
+INSERT INTO AdoptionApp VALUES (8, 7, 103, 8, '2025-03-01', 'APP');
+INSERT INTO AdoptionApp VALUES (9, 8, 103, 9, '2025-03-20', 'APP');
+INSERT INTO AdoptionApp VALUES (10, 9, 103, 10, '2025-04-05', 'APP');
+INSERT INTO AdoptionApp VALUES (11, 10, 103, 11, '2025-04-10', 'WIT');
+INSERT INTO AdoptionApp VALUES (12, 11, 103, 12, '2025-05-01', 'APP');
+INSERT INTO AdoptionApp VALUES (13, 12, 103, 13, '2025-05-15', 'APP');
+INSERT INTO AdoptionApp VALUES (14, 13, 103, 14, '2025-06-01', 'APP');
+INSERT INTO AdoptionApp VALUES (15, 14, 103, 15, '2025-06-20', 'APP');
+INSERT INTO AdoptionApp VALUES (16, 15, 103, 1, '2025-07-01', 'PEN');
+INSERT INTO AdoptionApp VALUES (17, 1, 103, 7, '2025-07-15', 'APP');
+INSERT INTO AdoptionApp VALUES (18, 2, 103, 11, '2025-08-01', 'APP');
+INSERT INTO AdoptionApp VALUES (19, 3, 103, 2, '2025-08-15', 'APP');
+INSERT INTO AdoptionApp VALUES (20, 4, 103, 10, '2025-09-01', 'APP');
+
+INSERT INTO Adoption VALUES (1, 3, '2024-01-03', 200.00, 'Once a month for the first 6 mos.');
+INSERT INTO Adoption VALUES (2, 4, NULL, 400.00, 'Once a month for the first 6 mos.');
+INSERT INTO Adoption VALUES (3, 5, '2008-05-27', 10.00, 'Once a month for the first 6 mos.');
+INSERT INTO Adoption VALUES (4, 6, '2025-02-05', 50.00, 'Email update weekly');
+INSERT INTO Adoption VALUES (5, 8, '2025-03-05', 300.00, 'Vet visit in 1 month');
+INSERT INTO Adoption VALUES (6, 9, '2025-03-25', 25.00, 'None');
+INSERT INTO Adoption VALUES (7, 10, '2025-04-08', 350.00, 'Call in 2 weeks');
+
+
+INSERT INTO Event VALUES (1, 104, '2020-03-13', INTERVAL '02:30:00' HOUR TO SECOND, 3, 'LAST DAY OF SCHOOL!', 6, TRUE);
+INSERT INTO Event VALUES (2, 104, '2015-07-18', INTERVAL '16:30:00' HOUR TO SECOND, 2, 'Jamies Birthday!', 50, TRUE);
+INSERT INTO Event VALUES (3, 104, '2023-05-01', INTERVAL '12:30:00' HOUR TO SECOND, 1, 'Adoption bonanza', 2, TRUE);
+INSERT INTO Event VALUES (4, 109, '2025-01-15', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Puppy Yoga', 20, FALSE);
+INSERT INTO Event VALUES (5, 113, '2025-02-14', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Valentines Mixer', 30, FALSE);
+INSERT INTO Event VALUES (6, 104, '2025-03-17', INTERVAL '14:00:00' HOUR TO SECOND, 11, 'St Patricks Parade', 25, FALSE);
+INSERT INTO Event VALUES (7, 109, '2025-04-20', INTERVAL '09:00:00' HOUR TO SECOND, 5, 'Kitten Cuddles', 15, FALSE);
+INSERT INTO Event VALUES (8, 113, '2025-05-05', INTERVAL '17:00:00' HOUR TO SECOND, 15, 'Cinco de Mayo Party', 30, FALSE);
+INSERT INTO Event VALUES (9, 104, '2025-06-21', INTERVAL '12:00:00' HOUR TO SECOND, 11, 'Summer Solstice Run', 20, FALSE);
+INSERT INTO Event VALUES (10, 109, '2025-07-04', INTERVAL '20:00:00' HOUR TO SECOND, 15, 'Quiet Room (No Fireworks)', 20, FALSE);
+INSERT INTO Event VALUES (11, 113, '2025-08-15', INTERVAL '15:00:00' HOUR TO SECOND, 5, 'Ice Cream Social', 15, FALSE);
+INSERT INTO Event VALUES (12, 104, '2025-09-10', INTERVAL '11:00:00' HOUR TO SECOND, 15, 'Training 101', 10, FALSE);
+INSERT INTO Event VALUES (13, 109, '2025-10-31', INTERVAL '18:00:00' HOUR TO SECOND, 15, 'Halloween Costume Contest', 30, FALSE);
+INSERT INTO Event VALUES (14, 113, '2025-11-20', INTERVAL '13:00:00' HOUR TO SECOND, 5, 'Thanksgiving Feast', 20, FALSE);
+INSERT INTO Event VALUES (15, 104, '2025-12-25', INTERVAL '10:00:00' HOUR TO SECOND, 15, 'Holiday Open House', 30, FALSE);
+
+INSERT INTO Booking VALUES (1, 1, 2, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (2, 1, 3, 'ATT', FALSE, FALSE);
+INSERT INTO Booking VALUES (3, 2, 2, 'CAN', TRUE, TRUE);
+INSERT INTO Booking VALUES (4, 4, 1, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (5, 4, 4, 'ATT', TRUE, FALSE);
+INSERT INTO Booking VALUES (6, 5, 5, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (7, 5, 6, 'NOS', FALSE, FALSE);
+INSERT INTO Booking VALUES (8, 6, 7, 'ATT', TRUE, FALSE);
+INSERT INTO Booking VALUES (9, 7, 8, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (10, 8, 9, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (11, 9, 10, 'CAN', FALSE, FALSE);
+INSERT INTO Booking VALUES (12, 10, 11, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (13, 11, 12, 'ATT', TRUE, FALSE);
+INSERT INTO Booking VALUES (14, 12, 13, 'REG', TRUE, FALSE);
+INSERT INTO Booking VALUES (15, 13, 14, 'REG', TRUE, FALSE);

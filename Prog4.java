@@ -1,6 +1,4 @@
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 @SuppressWarnings("UseSpecificCatch")
@@ -26,7 +24,15 @@ public class Prog4 {
          */
 
         ui.setInitialMode(
-            new Menu("Home", ()->System.out.println("Welcome to El Jefe Cat Cafe!")).addSubMenu(new Menu[] {
+            new Menu("Home", ()->{
+            System.out.println("Welcome to El Jefe Cat Cafe!");
+            try{var rs = DB.prepared("SELECT TO_CHAR(CURRENT_DATE, 'DY, MON DD, YYYY')"+
+                " || ' @ ' || TO_CHAR(CURRENT_TIMESTAMP, 'HH:MI AM') as d FROM DUAL").executeQuery();
+                rs.next();
+                System.out.println(rs.getString(1));
+            }catch(Exception e){}
+            System.out.println("\nType \"exit\" any time to cancel an action or exit the program.");
+        }).addSubMenu(new Menu[] {
                 new Menu("Customer Registration", ()->registerMember()),
                 new Menu("Our Pets", ()->listPets()), 
                 new Menu("Customer Dashboard", ()->login(false)).addSubMenu(new Menu[] {
@@ -86,13 +92,17 @@ public class Prog4 {
                         new Menu("Void/Correct Entry", ()->{/**TODO: Req 5 (Logically Delete)*/}),
                     }),
                     new Menu("Adoptions").addSubMenu(new Menu[] {
-                        new Menu("Review Applications", ()->{/**TODO: Req 6 (Update - Approve/Reject)*/}),
-                        new Menu("Finalize Adoption", ()->{/**TODO: Update pet status/archive*/}),
+                        new Menu("Review Applications", ()->showAdoptApps()).addSubMenu(new Menu[] {
+                            new Menu("Approve", ()->approveAdoptApp()),
+                            new Menu("Reject", ()->rejectAdoptApp()),
+                        }),
+                        new Menu("Finalize Adoption", ()->finalizeAdoptApp()),
                     }),
                     new Menu("Events Management").addSubMenu(new Menu[] {
-                        new Menu("View All Events", ()->{/**TODO: */}), 
-                        new Menu("Create New Event", ()->{/**TODO: */}),
-                        new Menu("Cancel Event", ()->{/**TODO: */}),
+                        new Menu("View All Events", ()->listAllEvents()), 
+                        new Menu("Create New Event", ()->newEvent()),
+                        new Menu("Cancel Event", ()->cancelEvent()),
+                        new Menu("Delete Event", ()->deleteEvent()),
                     }),
                 })
             })
@@ -347,7 +357,7 @@ public class Prog4 {
 
     public static void addPet() {
         try {
-            var stmt = DB.prepared("INSERT INTO Pet VALUES (pet_seq.NEXTVAL, ?, ?, ?, ?, ?, ? )", true);
+            var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(DB.uniqueId("Pet", "petId")), true);
             stmt.setString(1, Prompt.string("Animal Type", ""));
             stmt.setString(2, Prompt.stringNullable("Breed", null));
             stmt.setInt(3, Prompt.integer("Age", null));
@@ -371,6 +381,7 @@ public class Prog4 {
 
     public static void updatePet() {
         try {
+            listPets();
             int id = validateID(
                     Prompt.integer("ID of pet you wish to edit", null),
                     "Pet",
@@ -402,6 +413,7 @@ public class Prog4 {
     
     public static void deletePet() {
         try {
+            listPets();
             int id = validateID(
                     Prompt.integer("ID of Pet you wish to delete", null),
                     "Pet",
@@ -420,6 +432,7 @@ public class Prog4 {
 
     public static void viewAdoptionAppsForPet() {
         try {
+            listPets();
             int id = validateID(
                     Prompt.integer("ID of Pet you want to view applications for", null),
                     "Pet",
@@ -449,6 +462,7 @@ public class Prog4 {
 
     public static void viewHealthInfoForPet() {
         try {
+            listPets();
             var id = validateID(
                     Prompt.integer("ID of Pet you want to view health records of", null),
                     "Pet",
@@ -563,9 +577,9 @@ public class Prog4 {
         try {
             listReservations();
             var resId = Prompt.integer("Reservation ID to extend: ", null);
-            var newDuration = Prompt.time("New Duration", "HH:mm:ss");
+            var newDuration = Prompt.time("New Duration", "HH:mm");
             DB.executeUpdate(
-                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO SECOND) WHERE reservationId = ? AND memberNum = ?",
+                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO MINUTE) WHERE reservationId = ? AND memberNum = ?",
                     newDuration.toString(), resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation extended successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
@@ -588,7 +602,8 @@ public class Prog4 {
                             s.name as "Coordinator"
                         FROM Event e
                         LEFT JOIN Booking b ON e.eventId = b.eventId
-                        LEFT JOIN Staff s ON s.empId = e.coordinator 
+                        LEFT JOIN Staff s ON s.empId = e.coordinator
+                        WHERE e.canceled = FALSE
                         GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
                         HAVING (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) > 0
                     """);
@@ -603,7 +618,7 @@ public class Prog4 {
                         SELECT e.eventId as "ID",
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
                             e.description,
-                            e.roomId,
+                            e.roomId
                         FROM (Event e
                         JOIN Booking b USING (eventId))
                         WHERE b.member = ? AND b.status NOT IN ('CAN')
@@ -787,6 +802,7 @@ public class Prog4 {
     public static void listMyAdoptions(Boolean justApps){
         try {
             System.out.println("-- All Applications --");
+            try{
             DB.printQuery("""
                         SELECT a.appId as "ID",
                             p.name as "Name",
@@ -802,6 +818,9 @@ public class Prog4 {
                         WHERE a.memberNum = ? AND a.status NOT IN ('APP'%s)
                         ORDER BY a.appDate DESC
                     """.formatted(justApps ? ",'WIT'":""), ProgramContext.getUserId());
+            } catch (Exception e){
+                System.out.println("none.");
+            }
             if(justApps) return;
             System.out.println("-- All Adoptions --");
             try{
@@ -809,7 +828,7 @@ public class Prog4 {
                         SELECT p.adoptId as "ID",
                             p.name as "Name",
                             TO_CHAR(p.adoptDate, 'DY, MON DD, YYYY HH:MI AM') as "Adopt Date",
-                            p.fee as "Fee",
+                            p.fee as "Fee ($)",
                             p.followUpSchedule as "Follow Up Schedule"
                         FROM (AdoptionApp a JOIN Pet p USING (petId)) JOIN Adoption p USING (appId)
                         WHERE a.memberNum = ?
@@ -861,6 +880,104 @@ public class Prog4 {
                     INSERT INTO AdoptionApp VALUES (%d, ?, NULL, ?, CURRENT_DATE, 'PEN')
                     """.formatted(appId), ProgramContext.getUserId(), pid);
             ProgramContext.setStatusMessage("Created a new application!", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void newEvent() {
+        try {
+            System.out.println("-- Rooms -- ");
+            DB.printQuery("SELECT roomId as \"ID\", maxCapacity as\"Max Cap.\" FROM Room");
+            DB.executeUpdate("INSERT INTO Event VALUES(%d,?,?,CAST(? AS INTERVAL HOUR TO MINUTE),?,?,?, FALSE)"
+                .formatted(DB.uniqueId("Event", "eventId")),
+                    ProgramContext.getUserId(),
+                    Prompt.date("Event Date", "MM-dd-yyyy H:m", null),
+                    Prompt.time("Event Duration", "H:m").toString(),
+                    Prompt.integer("Room ID (from above)", null),
+                    Prompt.string("Event Description", null),
+                    Prompt.integer("Max Capacity (Cannot exceed chosen Room's Max capacity)", null)
+                );
+            ProgramContext.successMessage("Created new event!");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void cancelEvent(){
+        try {
+            listAllEvents();
+            var eid = Prompt.integer("Event Id", null);
+            DB.executeUpdate("UPDATE Event SET canceled=TRUE WHERE eventId=?", eid);
+            DB.executeUpdate("UPDATE Booking SET status='CAN' WHERE eventId=?", eid);
+            ProgramContext.successMessage("Successfully canceled event.");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void deleteEvent(){
+        try {
+            DB.printQuery("""
+                    SELECT eventId as "ID", description as "Name" FROM
+                    Event WHERE canceled=TRUE AND eventDate > (CURRENT_DATE + 14)
+                    """); // "well in advance is 14 days i think"
+            DB.executeUpdate("DELETE FROM Event WHERE eventId=? AND canceled", Prompt.integer("Event ID", null));
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void showAdoptApps(){
+        try {
+            DB.printQuery("""
+                SELECT a.appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
+                p.name as "Pet Name", TO_CHAR(a.appDate, 'MM-dd-yyyy') as "App Date", a.status as "Status" 
+                FROM AdoptionApp a LEFT OUTER JOIN Member m USING (memberNum)
+                LEFT OUTER JOIN Staff e USING (empId)
+                LEFT OUTER JOIN Pet p USING (petId)
+                WHERE a.status NOT IN ('REJ', 'WIT', 'APP')
+                """);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void approveAdoptApp(){
+        try {
+            showAdoptApps();
+            DB.executeUpdate("UPDATE AdoptionApp SET status='APP' WHERE appId=?",Prompt.integer("Application ID", null));
+            ProgramContext.successMessage("Approved Application");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void rejectAdoptApp(){
+        try {
+            showAdoptApps();
+            DB.executeUpdate("UPDATE AdoptionApp SET status='REJ' WHERE appId=?",Prompt.integer("Application ID", null));
+            ProgramContext.successMessage("Rejected Application");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+    public static void finalizeAdoptApp(){
+        try {
+            DB.printQuery("""
+                SELECT a.appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
+                p.name as "Pet Name", TO_CHAR(a.appDate, 'MM-dd-yyyy') as "App Date"
+                FROM AdoptionApp a LEFT OUTER JOIN Member m USING (memberNum)
+                LEFT OUTER JOIN Staff e USING (empId)
+                LEFT OUTER JOIN Pet p USING (petId)
+                LEFT OUTER JOIN Adoption n using (appId)
+                WHERE a.status IN ('APP') AND n.adoptId IS NULL
+                """);
+            DB.executeUpdate("INSERT INTO Adoption VALUES (%d, ?, ?, ?, ?)"
+                .formatted(DB.uniqueId("Adoption", "adoptId")),
+                Prompt.integer("Application ID", null),
+                Prompt.date("Adoption Date", "MM-dd-yyyy", null),
+                Prompt.integer("Adoption Fee ($)", null),
+                Prompt.stringNullable("follow up schedule", null));
+            ProgramContext.successMessage("Finalized Adoption");
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
