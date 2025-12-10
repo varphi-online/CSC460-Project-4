@@ -28,6 +28,7 @@
  * Author:  L. McCann (2008-11-19; updated 2015-10-28 and 2021-10-19)
  */
 
+import java.lang.Thread.State;
 import java.sql.*;
 import java.util.*;
 
@@ -103,6 +104,19 @@ public class DB {
         return null;
     }
 
+    public static PreparedStatement prepared(String query, boolean returnGeneratedKeys) {
+        try {
+            if (returnGeneratedKeys) {
+                return db.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            } else {
+                return db.prepareStatement(query);
+            }
+        } catch (SQLException e) {
+            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
+        }
+        return null;
+    }
+    
     public static void safeExecute(Runnable action) {
     try {
         action.run();
@@ -125,7 +139,6 @@ public class DB {
         stmt.setObject(i + 1, params[i]);
     }
     var rs = stmt.executeQuery();
-    rs.next();
     return rs;
     }
 
