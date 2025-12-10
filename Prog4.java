@@ -1,3 +1,18 @@
+/*
+ * Names: Aidan Fuhrmann. Aidan DiNunzio, Jesse Oved
+ * Course: CSC 460
+ * Assignment: Prog4 - Cat Cafe Database Management
+ * Instructor: Dr. Lester McCann
+ * TA: Utkarsh Upadhyay and Jianwei Shen
+ * Due Date: 12/8/25 - Extended to 12/10/25
+ *
+ * Description:
+ * This program serves as a CLI for the El Jefe Cat Cafe
+ * database management system. It allows users to interact with
+ * a database to manage reservations, food orders, pet adoptions, events,
+ * and health records.
+ */
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -5,7 +20,29 @@ import java.util.Scanner;
 @SuppressWarnings("UseSpecificCatch")
 public class Prog4 {
     private static final Scanner scanner = new Scanner(System.in);
+
+    /*
+     * Method Name: getScanner
+     * Purpose: Provides access to the global Scanner instance used for user input.
+     * Pre-conditions: Scanner must be initialized.
+     * Post-conditions: Returns the active Scanner object.
+     * Return Value: Scanner - The global scanner instance.
+     * Parameters: None
+     */
     public static Scanner getScanner(){return scanner;}
+
+    /*
+     * Method Name: main
+     * Purpose: Entry point of the application. Initializes the database connection,
+     *          defines the menu structure for the User Interface, and starts the
+     *          main execution loop.
+     * Pre-conditions: Command line arguments must contain valid DB credentials.
+     * Post-conditions: The application runs until the user chooses to exit.
+     *                  Database connection is closed upon exit.
+     * Return Value: None
+     * Parameters:
+     *    args (String[]) In : Command line arguments for DB initialization.
+     */
     public static void main(String[] args) throws SQLException {
         DB.init(args);
         UI ui = new UI();
@@ -30,7 +67,7 @@ public class Prog4 {
             try{var rs = DB.prepared("SELECT TO_CHAR(CURRENT_DATE, 'DY, MON DD, YYYY')"+
                 " || ' @ ' || TO_CHAR(CURRENT_TIMESTAMP, 'HH:MI AM') as d FROM DUAL").executeQuery();
                 rs.next();
-                System.out.println(rs.getString(1));
+                System.out.println("Today is: "+rs.getString(1));
             }catch(Exception e){}
             System.out.println("\nType \"exit\" any time to cancel an action or exit the program.");
         }).addSubMenu(new Menu[] {
@@ -117,6 +154,17 @@ public class Prog4 {
         DB.db.close();
     }
     
+    /*
+     * Method Name: login
+     * Purpose: Authenticates a user (Member or Staff) by checking their ID against
+     *          the database. Updates the global ProgramContext upon success.
+     * Pre-conditions: Database connection must be active.
+     * Post-conditions: ProgramContext contains the User ID and User Type, or an
+     *                  error is thrown if authentication fails.
+     * Return Value: None
+     * Parameters:
+     *    staff (Boolean) In : True if attempting to login as Staff, False for Member.
+     */
     public static void login(Boolean staff) {
         // No password auth.
         if (ProgramContext.getUserId() != null &&
@@ -142,6 +190,15 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: viewVisitHistory
+     * Purpose: Retrieves and displays a history of the current member's visits,
+     *          including food orders, total spent, and membership tier at the time.
+     * Pre-conditions: User must be logged in as a Member.
+     * Post-conditions: Visit history is printed to the standard output.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void viewVisitHistory() {
         try {
             System.out.println("--- Visit History ---");
@@ -184,6 +241,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: getMemInfo
+     * Purpose: Retrieves and displays the current member's personal details.
+     * Pre-conditions: User must be logged in as a Member.
+     * Post-conditions: Member details are printed to the standard output.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void getMemInfo() {
         try {
             DB.printQuery("""
@@ -196,6 +261,15 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: changeMembershipTier
+     * Purpose: Allows a member to upgrade or downgrade their membership tier.
+     *          Updates the MemberHistory table to reflect the change.
+     * Pre-conditions: User must be logged in as a Member.
+     * Post-conditions: Member table and MemberHistory table are updated in the database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void changeMembershipTier() {
         try {
             var id = ProgramContext.getUserId();
@@ -219,6 +293,15 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: deleteMember
+     * Purpose: Deletes the currently logged-in member from the database, provided
+     *          they have no active obligations (reservations, unpaid orders, etc.).
+     * Pre-conditions: User must be logged in. No active constraints must exist.
+     * Post-conditions: Member record is deleted and application terminates.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void deleteMember() {
         try {
             int id = ProgramContext.getUserId();
@@ -261,6 +344,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: registerMember
+     * Purpose: Collects user input to create a new Member account in the database.
+     * Pre-conditions: Database connection active.
+     * Post-conditions: New Member row inserted; MemberHistory row inserted.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void registerMember() {
         try {
             var rs = DB.execute("SELECT count(*) FROM Member");
@@ -293,6 +384,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: modifyMember
+     * Purpose: Updates contact information (Name, Phone, Email) for the logged-in member.
+     * Pre-conditions: User must be logged in as a Member.
+     * Post-conditions: Member table is updated with new values.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void modifyMember() {
         try {
             int id = ProgramContext.getUserId();
@@ -317,6 +416,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: checkCustIn
+     * Purpose: Staff operation to check a customer in for their reservation.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Reservation record updated (checkedIn = 'YES').
+     * Return Value: None
+     * Parameters: None
+     */
     public static void checkCustIn() {
         try {
             DB.printQuery("""
@@ -344,6 +451,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: checkCustOut
+     * Purpose: Staff operation to check a customer out after their reservation.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Reservation record updated (checkedOut = 'YES').
+     * Return Value: None
+     * Parameters: None
+     */
     public static void checkCustOut() {
         try {
             DB.printQuery("""
@@ -370,7 +485,17 @@ public class Prog4 {
         }
     }
 
-    /* validates that an ID exists in the specified table. returns the ID for convenience. */
+    /*
+     * Method Name: validateID
+     * Purpose: Helper method to verify that a specific ID exists within a given table.
+     * Pre-conditions: Database connection active.
+     * Post-conditions: Throws SQLException if ID is not found.
+     * Return Value: Integer - The validated ID.
+     * Parameters:
+     *    id (Integer) In : The primary key ID to check.
+     *    relation (String) In : The name of the database table.
+     *    idName (String) In : The name of the primary key column.
+     */
     public static Integer validateID(Integer id, String relation, String idName) throws SQLException {
         var rs = DB.executeQuery("SELECT 1 FROM %s WHERE %s = ?".formatted(relation, idName), id);
         if (!rs.next())
@@ -378,6 +503,15 @@ public class Prog4 {
         return id;
     }
 
+    /*
+     * Method Name: printPetInfo
+     * Purpose: Prints details of a specific pet.
+     * Pre-conditions: Pet ID must exist.
+     * Post-conditions: Pet details printed out.
+     * Return Value: None
+     * Parameters:
+     *    id (Integer) In : The unique ID of the pet.
+     */
     public static void printPetInfo(Integer id) throws SQLException {
         DB.printQuery("""
                 SELECT *
@@ -386,6 +520,14 @@ public class Prog4 {
                 """, id);
     }
 
+    /*
+     * Method Name: addPet
+     * Purpose: Adds a new pet to the database.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: A new row is inserted into the Pet table.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void addPet() {
         try {
             var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(DB.uniqueId("Pet", "petId")), true);
@@ -410,6 +552,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: updatePet
+     * Purpose: Modifies existing information for a specific pet.
+     * Pre-conditions: User must be logged in as Staff. Pet must exist.
+     * Post-conditions: Pet record is updated in the database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void updatePet() {
         try {
             listPets();
@@ -442,6 +592,14 @@ public class Prog4 {
         }
     }
     
+    /*
+     * Method Name: deletePet
+     * Purpose: Removes a pet from the database.
+     * Pre-conditions: User must be logged in as Staff. Pet must exist.
+     * Post-conditions: Pet record is deleted.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void deletePet() {
         try {
             listPets();
@@ -461,6 +619,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: viewAdoptionAppsForPet
+     * Purpose: Displays all adoption applications associated with a specific pet.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Application list printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void viewAdoptionAppsForPet() {
         try {
             listPets();
@@ -491,6 +657,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: viewHealthInfoForPet
+     * Purpose: Displays the health records and history for a specific pet.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Health records printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void viewHealthInfoForPet() {
         try {
             listPets();
@@ -524,6 +698,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listPets
+     * Purpose: Lists all pets currently in the database.
+     * Pre-conditions: Database connection active.
+     * Post-conditions: Pet list printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void listPets() {
         try {
             DB.printQuery("""
@@ -537,6 +719,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listReservations
+     * Purpose: Lists all reservations made by the currently logged-in member.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Reservation list printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void listReservations() {
         try {
             DB.printQuery("""
@@ -558,6 +748,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: bookReservation
+     * Purpose: Creates a new reservation for the logged-in member.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: New Reservation row inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void bookReservation() {
         try {
             String resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null).toString();
@@ -580,6 +778,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: cancelReservation
+     * Purpose: Cancels an existing reservation for the logged-in member.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Reservation row deleted from database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void cancelReservation() {
         try {
             listReservations();
@@ -591,6 +797,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: rescheduleReservation
+     * Purpose: Updates the date and time of an existing reservation.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Reservation record updated with new date/time.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void rescheduleReservation() {
         try {
             listReservations();
@@ -604,6 +818,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: extendReservation
+     * Purpose: Updates the duration of an existing reservation.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Reservation record updated with new duration.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void extendReservation() {
         try {
             listReservations();
@@ -618,7 +840,14 @@ public class Prog4 {
         }
     }
 
-    // Events Member
+    /*
+     * Method Name: listAllEvents
+     * Purpose: Displays all scheduled events that are not canceled.
+     * Pre-conditions: Database connection active.
+     * Post-conditions: Event details including capacity are printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void listAllEvents() {
         try {
             DB.printQuery("""
@@ -643,6 +872,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listMyEvents
+     * Purpose: Displays events the logged-in member has registered for.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Registered events printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void listMyEvents() {
         try {
             DB.printQuery("""
@@ -660,6 +897,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: registerForEvent
+     * Purpose: Registers the logged-in member for a specific event.
+     * Pre-conditions: User must be logged in as Member. Event must exist.
+     * Post-conditions: Booking record inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void registerForEvent() {
         try {
             listAllEvents();
@@ -676,6 +921,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: withdrawFromEvent
+     * Purpose: Cancels a member's registration for an event.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Booking status updated to 'CAN' (Cancelled).
+     * Return Value: None
+     * Parameters: None
+     */
     public static void withdrawFromEvent() {
         try {
             listMyEvents();
@@ -690,10 +943,26 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listFoodItems
+     * Purpose: Helper method to display available food items and prices.
+     * Pre-conditions: Database connection active.
+     * Post-conditions: Item list printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     private static void listFoodItems() throws SQLException {
         DB.printQuery("SELECT itemId as \"ID\", itemName as \"Item\", '$' || price as \"Price\" FROM Item");
     }
 
+    /*
+     * Method Name: listMyOrders
+     * Purpose: Displays all food orders placed by the logged-in member.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Order history printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     private static void listMyOrders() {
         try {
             DB.printQuery("""
@@ -710,6 +979,16 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: recalculateOrderTotal
+     * Purpose: Calculates the total price of an order based on items and quantities.
+     *          Updates the FoodOrder table with the new total.
+     * Pre-conditions: Order ID must exist.
+     * Post-conditions: FoodOrder total price updated in database.
+     * Return Value: None
+     * Parameters:
+     *    orderId (int) In : The ID of the order to recalculate.
+     */
     private static void recalculateOrderTotal(int orderId) throws SQLException {
         var rs = DB.prepared("""
                     SELECT COALESCE(SUM(i.price * oi.quantity), 0)
@@ -725,6 +1004,15 @@ public class Prog4 {
         DB.executeUpdate("UPDATE FoodOrder SET totalPrice = ? WHERE orderId = ?", newTotal, orderId);
     }
 
+    /*
+     * Method Name: placeOrder
+     * Purpose: Allows a member to create a new food order linked to a reservation.
+     *          Handles item selection and quantity input.
+     * Pre-conditions: User must be logged in as Member. Reservation must exist.
+     * Post-conditions: FoodOrder and OrderItem records inserted. Total calculated.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void placeOrder() {
         try {
             listReservations();
@@ -764,6 +1052,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: updateOrder
+     * Purpose: Modifies an existing food order by adding, removing, or changing item quantities.
+     * Pre-conditions: User must be logged in as Member. Order must exist.
+     * Post-conditions: OrderItem records updated/deleted/inserted. Total price recalculated.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void updateOrder() {
         try {
             listMyOrders();
@@ -813,6 +1109,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: cancelOrder
+     * Purpose: Cancels a food order and removes associated items.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: FoodOrder and OrderItem records deleted.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void cancelOrder() {
         try {
             listMyOrders();
@@ -830,6 +1134,15 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listMyAdoptions
+     * Purpose: Lists adoption applications and finalized adoptions for the member.
+     * Pre-conditions: User must be logged in as Member.
+     * Post-conditions: Adoption details printed out.
+     * Return Value: None
+     * Parameters:
+     *    justApps (Boolean) In : If true, only shows applications. If false, shows both.
+     */
     public static void listMyAdoptions(Boolean justApps){
         try {
             System.out.println("-- All Applications --");
@@ -873,6 +1186,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: withdrawAdoptApp
+     * Purpose: Withdraws a pending adoption application.
+     * Pre-conditions: User must be logged in as Member. Application must exist.
+     * Post-conditions: Application status updated to 'WIT' (Withdrawn).
+     * Return Value: None
+     * Parameters: None
+     */
     public static void withdrawAdoptApp(){
         try{
         listMyAdoptions(true);
@@ -885,6 +1206,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: newAdoptionApp
+     * Purpose: Submits a new adoption application for a specific pet.
+     * Pre-conditions: User must be logged in as Member. Pet must be adoptable.
+     * Post-conditions: AdoptionApp record inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void newAdoptionApp(){
         try{
             DB.printQuery("""
@@ -916,6 +1245,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: newEvent
+     * Purpose: Staff operation to create a new event.
+     * Pre-conditions: User must be logged in as Staff. Room must accommodate capacity.
+     * Post-conditions: Event record inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void newEvent() {
         try {
             System.out.println("-- Rooms -- ");
@@ -935,6 +1272,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: cancelEvent
+     * Purpose: Staff operation to cancel a scheduled event.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Event marked canceled. Associated Bookings cancelled.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void cancelEvent(){
         try {
             listAllEvents();
@@ -947,6 +1292,15 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: deleteEvent
+     * Purpose: Staff operation to delete an event record entirely.
+     *          Only allowed if event is canceled and in the distant future (14+ days).
+     * Pre-conditions: User must be logged in as Staff. Event must meet criteria.
+     * Post-conditions: Event record deleted from database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void deleteEvent(){
         try {
             DB.printQuery("""
@@ -959,6 +1313,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: showAdoptApps
+     * Purpose: Displays active adoption applications for staff review.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Application list printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void showAdoptApps(){
         try {
             DB.printQuery("""
@@ -973,6 +1335,15 @@ public class Prog4 {
             ProgramContext.genericError(e);
         }
     }
+
+    /*
+     * Method Name: approveAdoptApp
+     * Purpose: Staff operation to approve an adoption application.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Application status set to 'APP' (Approved).
+     * Return Value: None
+     * Parameters: None
+     */
     public static void approveAdoptApp(){
         try {
             showAdoptApps();
@@ -982,6 +1353,15 @@ public class Prog4 {
             ProgramContext.genericError(e);
         }
     }
+
+    /*
+     * Method Name: rejectAdoptApp
+     * Purpose: Staff operation to reject an adoption application.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Application status set to 'REJ' (Rejected).
+     * Return Value: None
+     * Parameters: None
+     */
     public static void rejectAdoptApp(){
         try {
             showAdoptApps();
@@ -991,6 +1371,15 @@ public class Prog4 {
             ProgramContext.genericError(e);
         }
     }
+
+    /*
+     * Method Name: finalizeAdoptApp
+     * Purpose: Converts an approved application into a finalized Adoption.
+     * Pre-conditions: User must be logged in as Staff. Application must be 'APP'.
+     * Post-conditions: Adoption record inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void finalizeAdoptApp(){
         try {
             DB.printQuery("""
@@ -1014,6 +1403,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: newHealthEntry
+     * Purpose: Creates a new health record entry for a pet.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: HealthRecord row inserted into database.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void newHealthEntry(){
         try {
             listPets();
@@ -1032,6 +1429,14 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: listMyEntries
+     * Purpose: Lists health records modified by the logged-in staff member.
+     * Pre-conditions: User must be logged in as Staff.
+     * Post-conditions: Health records printed out.
+     * Return Value: None
+     * Parameters: None
+     */
     public static void listMyEntries(){
         try{
             DB.printQuery("""
@@ -1046,6 +1451,16 @@ public class Prog4 {
         }
     }
 
+    /*
+     * Method Name: updateEntry
+     * Purpose: Updates or Voids (logically deletes) a health record.
+     *          Maintains revision history by inserting a new row with incremented revision number.
+     * Pre-conditions: User must be logged in as Staff. Record must exist.
+     * Post-conditions: New HealthRecord row inserted with updated data/status.
+     * Return Value: None
+     * Parameters:
+     *    delete (Boolean) In : If true, performs a void (delete) action. If false, updates data.
+     */
     public static void updateEntry(Boolean delete){
         try {
             DB.printQuery("""
