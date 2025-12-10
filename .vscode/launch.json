@@ -5,17 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "java",
-            "name": "Prog4",
-            "request": "launch",
-            "mainClass": "Prog4",
-            "projectName": "CSC460-Project-4_a6ab771c",
-            "classPaths": [
-                "${workspaceFolder}",
-                "${workspaceFolder}/misc_files/h2-2.4.240.jar"
-            ]
-        },
-        {
             "name": "Debug Prog4",
             "type": "java",
             "request": "launch",
@@ -25,7 +14,8 @@
             "classPaths": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/misc_files/h2-2.4.240.jar"
-            ]
+            ],
+            "preLaunchTask": "make-build"
         }
     ]
 }
