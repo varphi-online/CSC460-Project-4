@@ -13,10 +13,10 @@ CREATE TABLE Room(
 );
 
 -- This can be used for an auto-incrementing PK for Pet. 
-CREATE SEQUENCE pet_seq
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+-- CREATE SEQUENCE pet_seq
+--     START WITH 1
+--     INCREMENT BY 1
+--     NOCACHE;
 
 CREATE TABLE Pet (
     petId INTEGER NOT NULL,
@@ -71,10 +71,10 @@ CREATE TABLE PetRoomHistory (
 );
 
 -- This can be used for an auto-incrementing PK for Member. 
-CREATE SEQUENCE member_seq
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE;
+-- CREATE SEQUENCE member_seq
+--     START WITH 1
+--     INCREMENT BY 1
+--     NOCACHE;
 
 CREATE TABLE Member (
     memberNum INTEGER NOT NULL,
@@ -143,6 +143,7 @@ CREATE TABLE Reservation (
 --         END IF;   
 --     END IF;
 -- END;
+-- /
 
 CREATE TABLE FoodOrder (
     orderId INTEGER,
@@ -232,7 +233,7 @@ CREATE TABLE Event (
     eventId INTEGER,
     coordinator INTEGER,
     eventDate DATE,
-    eventDuration INTERVAL DAY TO MINUTE,
+    eventDuration INTERVAL DAY TO SECOND,
     roomId INTEGER,
     description VARCHAR2(255),
     maxCapacity INTEGER,
@@ -280,6 +281,7 @@ CREATE TABLE Event (
 --     );
 --   END IF;
 -- END;
+-- /
 
 CREATE TABLE Booking (
     bookingId INTEGER,
@@ -315,3 +317,4 @@ CREATE TABLE Booking (
 --         RAISE_APPLICATION_ERROR(-20001, 'Max capacity for event has been met.');
 --     END IF;
 -- END;
+-- /
