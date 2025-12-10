@@ -86,10 +86,10 @@ public class Prog4 {
                         }),
                     }),
                     new Menu("Veterinary").addSubMenu(new Menu[] {
-                        new Menu("My Entries", ()->{/**TODO: */}), 
-                        new Menu("Add New Health Entry", ()->{/**TODO: Req 5 (Insert)*/}),
-                        new Menu("Edit Existing Entry", ()->{/**TODO: Req 5 (Update)*/}),
-                        new Menu("Void/Correct Entry", ()->{/**TODO: Req 5 (Logically Delete)*/}),
+                        new Menu("My Entries", ()->listMyEntries()), 
+                        new Menu("Add New Health Entry", ()->newHealthEntry()),
+                        new Menu("Edit Existing Entry", ()->updateEntry(false)),
+                        new Menu("Void Entry", ()->updateEntry(true)),
                     }),
                     new Menu("Adoptions").addSubMenu(new Menu[] {
                         new Menu("Review Applications", ()->showAdoptApps()).addSubMenu(new Menu[] {
@@ -318,6 +318,20 @@ public class Prog4 {
 
     public static void checkCustIn() {
         try {
+            DB.printQuery("""
+                SELECT m.memberNum, m.name
+                FROM Member m
+                JOIN Reservation r ON m.memberNum = r.memberNum
+                WHERE r.checkedIn = 'NO'
+                  AND r.reservationDate <= CURRENT_DATE
+                  AND r.reservationDate = (
+                      SELECT MAX(r2.reservationDate)
+                      FROM Reservation r2
+                      WHERE r2.memberNum = m.memberNum
+                        AND r2.checkedIn = 'NO'
+                        AND r2.reservationDate <= CURRENT_DATE
+                )
+                """);
             int memNum = Prompt.integer("Member #", null);
             DB.printQuery("SELECT reservationId as \"ID\", reservationDate as \"Date\", timeSlot as \"Time\" " +
                     "FROM Reservation WHERE memberNum=? AND checkedIn='NO'", memNum);
@@ -331,6 +345,22 @@ public class Prog4 {
 
     public static void checkCustOut() {
         try {
+            DB.printQuery("""
+                SELECT m.memberNum, m.name
+                FROM Member m
+                JOIN Reservation r ON m.memberNum = r.memberNum
+                WHERE r.checkedIn = 'YES'
+                  AND r.reservationDate <= CURRENT_DATE
+                  AND r.checkedOut = 'NO'
+                  AND r.reservationDate = (
+                      SELECT MAX(r2.reservationDate)
+                      FROM Reservation r2
+                      WHERE r2.memberNum = m.memberNum
+                        AND r2.checkedIn = 'YES'
+                        AND r2.checkedOut = 'NO'
+                        AND r2.reservationDate <= CURRENT_DATE
+                )
+                """);
             var memNum = Prompt.integer("Member #", null);
             DB.executeUpdate("UPDATE Reservation SET checkedOut='YES' WHERE memberNum=?", memNum);
             ProgramContext.setStatusMessage("Checked member out!", ProgramContext.Color.GREEN);
@@ -978,6 +1008,74 @@ public class Prog4 {
                 Prompt.integer("Adoption Fee ($)", null),
                 Prompt.stringNullable("follow up schedule", null));
             ProgramContext.successMessage("Finalized Adoption");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void newHealthEntry(){
+        try {
+            listPets();
+            DB.executeUpdate("INSERT INTO HealthRecord VALUES (%d, 1, 'insert', CURRENT_DATE, ?, ?, ?, ?, ?, ?)"
+                .formatted(DB.uniqueId("HealthRecord", "recId")),
+                Prompt.integer("Pet ID", null),
+                ProgramContext.getUserId(),
+                Prompt.choice("Record Type", new String[]{"Vet","Chk","Sch","Grm","Bhn"}).toUpperCase(),
+                Prompt.stringNullable("Record Description", null),
+                Prompt.date("Next Due Date", "MM-dd-yyyy", null),
+                Prompt.stringNullable("Record Status", null)
+            );
+            ProgramContext.successMessage("Created new Health Entry");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void listMyEntries(){
+        try{
+            DB.printQuery("""
+            SELECT r.recId as "ID", r.revNum as "Rev. #", r.revAction as "Rev. Action",
+            r.revDate as "Last Modified", p.name as "Pet Name", r.recType as "Record Type",
+            COALESCE(r.description, 'None') as "Description", TO_CHAR(r.nextDue, 'DY, MON, YYYY') as "Next Due",
+            COALESCE(r.status, 'None') as "Status" FROM
+            HealthRecord r LEFT OUTER JOIN Pet p USING (petId)
+            WHERE r.empId=?""", ProgramContext.getUserId());
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void updateEntry(Boolean delete){
+        try {
+            DB.printQuery("""
+            SELECT r.recId as "ID", r.revNum as "Rev. #", r.revAction as "Rev. Action",
+            TO_CHAR(r.revDate, 'MON-DD-YYYY') as "Last Modified", p.name as "Pet Name", 
+            r.recType as "Record Type", COALESCE(r.description, 'None') as "Description", 
+            TO_CHAR(r.nextDue, 'MON-DD-YYYY') as "Next Due", COALESCE(r.status, 'None') as "Status" 
+            FROM HealthRecord r LEFT OUTER JOIN Pet p ON r.petId = p.petId
+            WHERE (r.recId, r.revNum) IN ( SELECT recId, MAX(revNum) FROM HealthRecord GROUP BY recId)
+            ORDER BY r.recId ASC""");
+            var recNum = Prompt.integer("Record ID", null);
+            var rs = DB.executeQuery("""
+            SELECT r.revNum, r.petId, r.description, r.nextDue, r.status
+            FROM HealthRecord r 
+            WHERE r.recId = ? 
+            ORDER BY r.revNum DESC FETCH FIRST 1 ROWS ONLY""", recNum);
+            if(rs.next()){
+                DB.executeUpdate("INSERT INTO HealthRecord VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    recNum,
+                    rs.getInt(1) + 1, // increment rev auto
+                    delete ? "delete" : "update",
+                    new Date(System.currentTimeMillis()),
+                    delete ? rs.getInt(2) : Prompt.integer("Pet ID", rs.getInt(2)),
+                    ProgramContext.getUserId(),
+                    Prompt.choice("Record Type", new String[]{"Vet","Chk","Sch","Grm","Bhn"}).toUpperCase(),
+                    delete ? rs.getString(3) : Prompt.stringNullable("Record Description", rs.getString(3)),
+                    delete ? rs.getDate(4) : Prompt.date("Next Due Date", "MM-dd-yyyy", rs.getDate(4)),
+                    delete ? rs.getString(5) : Prompt.stringNullable("Record Status", rs.getString(5))
+                );
+                ProgramContext.successMessage("Updated Health Entry!");
+            } else {throw new RuntimeException("ID did not match a pet in the database.");}
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
