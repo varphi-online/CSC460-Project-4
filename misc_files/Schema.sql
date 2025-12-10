@@ -201,28 +201,6 @@ CREATE TABLE HealthRecord (
     FOREIGN KEY (empId) REFERENCES Staff(empId) ON DELETE SET NULL
 );
 
--- update by inserting
--- CREATE OR REPLACE TRIGGER HealthRecordRevision
--- BEFORE INSERT ON HealthRecord
--- FOR EACH ROW
--- DECLARE
---     v_max_rev INTEGER;
--- BEGIN
---     :NEW.revDate := SYSDATE;
---     SELECT NVL(MAX(revNum), 0)
---     INTO v_max_rev
---     FROM HealthRecord
---     WHERE recId = :NEW.recId;
---     :NEW.revNum := v_max_rev + 1;
---     IF :NEW.revAction IS NULL THEN
---         IF :NEW.revNum = 1 THEN
---             :NEW.revAction := 'insert';
---         ELSE
---             :NEW.revAction := 'update';
---         END IF;
---     END IF;
--- END;
-
 CREATE TABLE AdoptionApp (
     appId INTEGER,
     memberNum INTEGER,
