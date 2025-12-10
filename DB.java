@@ -139,7 +139,6 @@ public class DB {
         stmt.setObject(i + 1, params[i]);
     }
     var rs = stmt.executeQuery();
-    rs.next();
     return rs;
     }
 

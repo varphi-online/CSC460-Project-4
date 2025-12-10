@@ -8,7 +8,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Prompt {
@@ -225,7 +224,7 @@ public class Prompt {
 
     public static Boolean bool(String label, Boolean current) {
         while (true) {
-            System.out.printf("Is %s (yes/no)%s: ",
+            System.out.printf("%s (yes/no)%s: ",
                     label,
                     current == null
                             ? ""

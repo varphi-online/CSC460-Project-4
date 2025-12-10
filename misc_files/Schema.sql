@@ -33,7 +33,7 @@ CREATE TABLE PetNeed (
     petId INTEGER,
 
     PRIMARY KEY (need),
-    FOREIGN KEY (petId) REFERENCES Pet(petId)
+    FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE
 );
 
 CREATE TABLE PetTemperment (
