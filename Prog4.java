@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Scanner;
 
 @SuppressWarnings("UseSpecificCatch")
@@ -74,7 +75,7 @@ public class Prog4 {
                     new Menu("Front Desk Operations").addSubMenu(new Menu[] {
                         new Menu("Check Customer In", ()->checkCustIn()),
                         new Menu("Check Customer Out", ()->checkCustOut()),
-                        new Menu("Business Analytics", ()->{/**TODO: QUERY 4 (Custom Query)*/})
+                        new Menu("Business Analytics", ()->viewBusinessAnalytics())
                     }),
                     new Menu("Pets").addSubMenu(new Menu[] {
                         new Menu("Add New Pet", ()->addPet()),
@@ -1076,6 +1077,37 @@ public class Prog4 {
                 );
                 ProgramContext.successMessage("Updated Health Entry!");
             } else {throw new RuntimeException("ID did not match a pet in the database.");}
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void viewBusinessAnalytics() {
+        try {
+            System.out.println("Number of Adoptions over the past X months.");
+            var months = Prompt.integer("How far back in months to search", null);
+            LocalDate cutoff = LocalDate.now().minusMonths(months);
+            Date sqlCutoff = Date.valueOf(cutoff);
+            try {
+                DB.printQuery("""
+                            SELECT
+                                a.adoptId as "ID",
+                                p.name as "Pet Name",
+                                m.name as "Adopter",
+                                s.name as "Adoption Coordinator",
+                                a.adoptDate as "Adoption Date",
+                                a.fee as "Adoption Fee",
+                                a.followUpSchedule as "Follow Up Schedule"
+                            FROM Adoption a
+                            JOIN AdoptionApp app ON (a.appId = app.appId)
+                            JOIN Pet p ON (app.petId = p.petId)
+                            JOIN Member m ON (app.memberNum = m.memberNum)
+                            LEFT JOIN Staff s ON app.empId = s.empId
+                            WHERE a.adoptDate >= ?
+                        """, sqlCutoff);
+            } catch (Exception e) {
+                ProgramContext.warningMessage("No adoptions found over timeframe last %d months.".formatted(months));
+        }
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
