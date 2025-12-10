@@ -9,18 +9,47 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+/*
+ * Class Name: Prompt
+ *
+ * Purpose: 
+ * This class serves as a utility support class to handle console-based user input.
+ * It provides methods to prompt the user for various data types (String, Integer, 
+ * Date, Timestamp, Boolean, etc.), validating the input formats and handling 
+ * default values.
+ * 
+ * Class Constants and Variables:
+ * ExitFormError : RuntimeException - An exception thrown when the user types "exit" to cancel an operation.
+ * 
+ * Constructors:
+ * None.
+ * 
+ * Implemented Class Methods:
+ * string(String, String)
+ * stringNullable(String, String)
+ * choice(String, String[])
+ * integer(String, Integer)
+ * integerNullable(String, Integer)
+ * date(String, String, Date)
+ * timestamp(String, String, Timestamp)
+ * time(String, String)
+ * bool(String, Boolean)
+ */
 public class Prompt {
-    private static final Scanner scanner = Prog4.getScanner();
-    public static final RuntimeException ExitFormError = new RuntimeException("Cancelled.");
-    /**
-     * get a string from user.
-     * If current is blank or null, user MUST give a nonblank input.
-     * Otherwise they can leave blank and current will be used.
-     * 
-     * @param label   description of what you want user to input.
-     * @param current default value to use if input blank. use "" or null for no
-     *                default
-     * @return parsed String.
+    private static final Scanner scanner = Prog4.getScanner(); // Scanner instance retrieved from the main program for input reading.
+    public static final RuntimeException ExitFormError = new RuntimeException("Cancelled."); // Exception instance used to signal a user cancellation.
+
+    /*
+     * Method Name: string
+     * Purpose: Prompts the user for a string input. If a default (current) value is provided,
+     *          the user may leave the input blank to use the default. If no default is provided,
+     *          non-blank input is enforced.
+     * Pre-conditions: System.in is available via the scanner.
+     * Post-conditions: Input is consumed from the scanner. Throws ExitFormError if "exit" is typed.
+     * Return Value: String - The validated user input or the default value.
+     * Parameters:
+     *     label (in)   - Description of the required input to display to the user.
+     *     current (in) - The default string value (use "" or null for no default).
      */
     public static String string(String label, String current) {
         while (true) {
@@ -39,14 +68,16 @@ public class Prompt {
         }
     }
 
-    /**
-     * Get a string, allowing null result.
-     * If user input is blank, then returns current (if not blank/null) or null.
-     * 
-     * @param label   description of what you want user to input.
-     * @param current default value to use if input blank. use "" or null for no
-     *                default
-     * @return parsed String, or null value
+    /*
+     * Method Name: stringNullable
+     * Purpose: Prompts the user for a string input, allowing a null result.
+     *          If the input is blank, returns the default value or null.
+     * Pre-conditions: System.in is available via the scanner.
+     * Post-conditions: Input is consumed from the scanner. Throws ExitFormError if "exit" is typed.
+     * Return Value: String - The user input, the default value, or null.
+     * Parameters:
+     *     label (in)   - Description of the required input to display to the user.
+     *     current (in) - The default string value (use "" or null for no default).
      */
     public static String stringNullable(String label, String current) {
         System.out.printf("Enter %s %s: ",
@@ -62,14 +93,16 @@ public class Prompt {
         return input;
     }
 
-    /**
-     * Get a string from a specific list of choices. if you want to allow blank then
-     * include null in the list.
-     * input is case insenstive.
-     * 
-     * @param label   description of what you want user to input.
-     * @param choices list of valid inputs.
-     * @return the entry from the input list that was selected by the user.
+    /*
+     * Method Name: choice
+     * Purpose: Prompts the user to select a string from a specific list of valid choices.
+     *          Input is case-insensitive.
+     * Pre-conditions: The choices array must not be empty.
+     * Post-conditions: Input is consumed. Loops until valid input is received.
+     * Return Value: String - The string from the choices array matching the user's input.
+     * Parameters:
+     *     label (in)   - Description of the required input.
+     *     choices (in) - Array of valid string options (can include null).
      */
     public static String choice(String label, String[] choices) {
         var originalList = Arrays.asList(choices);
@@ -97,14 +130,16 @@ public class Prompt {
         }
     }
 
-    /**
-     * Get an integer from user.
-     * If current is blank or null, user MUST give a valid nonblank input.
-     * Otherwise they can leave blank and current will be used.
-     * 
-     * @param label   description of what you want user to input.
-     * @param current default value to use if input blank. use null for no default.
-     * @return parsed Integer
+    /*
+     * Method Name: integer
+     * Purpose: Prompts the user for an integer input. Enforces valid integer format
+     *          and requires input if no default is provided.
+     * Pre-conditions: System.in is available.
+     * Post-conditions: Input is consumed. Loops on NumberFormatException. Throws ExitFormError if "exit" is typed.
+     * Return Value: Integer - The parsed integer or default value.
+     * Parameters:
+     *     label (in)   - Description of the required input.
+     *     current (in) - Default integer value (use null for no default).
      */
     public static Integer integer(String label, Integer current) {
         while (true) {
@@ -125,13 +160,15 @@ public class Prompt {
         }
     }
 
-    /**
-     * Get an Integer, allowing null result.
-     * If user input is blank, then returns current (either an integer or null).
-     * 
-     * @param label   description of what you want user to input.
-     * @param current default value to use if input blank. use null for no default
-     * @return parsed Integer, or null value
+    /*
+     * Method Name: integerNullable
+     * Purpose: Prompts the user for an integer input, allowing a null result if the input is blank.
+     * Pre-conditions: System.in is available.
+     * Post-conditions: Input is consumed. Loops on NumberFormatException. Throws ExitFormError if "exit" is typed.
+     * Return Value: Integer - The parsed integer, default value, or null.
+     * Parameters:
+     *     label (in)   - Description of the required input.
+     *     current (in) - Default integer value (use null for no default).
      */
     public static Integer integerNullable(String label, Integer current) {
         while (true) {
@@ -152,12 +189,16 @@ public class Prompt {
         }
     }
 
-    /**
-     * Parses a date input of a specified format.
-     * 
-     * @param label   description of what the date is for
-     * @param pattern date pattern to use. e.g. "MM-dd-YYYY"
-     * @return parsed sql.Date object
+    /*
+     * Method Name: date
+     * Purpose: Prompts the user for a date string matching a specific pattern and converts it to java.sql.Date.
+     * Pre-conditions: Pattern must be a valid SimpleDateFormat string.
+     * Post-conditions: Input is consumed. Loops on ParseException. Throws ExitFormError if "exit" is typed.
+     * Return Value: Date - The parsed java.sql.Date object.
+     * Parameters:
+     *     label (in)   - Description of the date.
+     *     pattern (in) - The date format pattern (e.g., "MM-dd-YYYY").
+     *     current (in) - Default Date value.
      */
     public static Date date(String label, String pattern, Date current) {
         var format = new SimpleDateFormat(pattern);
@@ -181,12 +222,16 @@ public class Prompt {
         }
     }
 
-    /**
-     * Parses a timestamp input of a specified format.
-     * 
-     * @param label   description of what the date is for
-     * @param pattern date pattern to use. e.g. "HH:mm" or "MM-dd-YYYY HH:mm"
-     * @return parsed sql.Timestamp object
+    /*
+     * Method Name: timestamp
+     * Purpose: Prompts the user for a timestamp string matching a specific pattern and converts it to java.sql.Timestamp.
+     * Pre-conditions: Pattern must be a valid SimpleDateFormat string.
+     * Post-conditions: Input is consumed. Loops on ParseException. Throws ExitFormError if "exit" is typed.
+     * Return Value: Timestamp - The parsed java.sql.Timestamp object.
+     * Parameters:
+     *     label (in)   - Description of the timestamp.
+     *     pattern (in) - The format pattern (e.g., "HH:mm").
+     *     current (in) - Default Timestamp value.
      */
     public static Timestamp timestamp(String label, String pattern, Timestamp current) {
         var format = new SimpleDateFormat(pattern);
@@ -207,12 +252,15 @@ public class Prompt {
         }
     }
 
-    /**
-     * Parses a time input of a given format. Used for things like Intervals
-     * 
-     * @param label description of what the time is for
-     * @param pattern format to use (e.g. HH:mm:ss or HH:mm)
-     * @return parsed LocalTime object
+    /*
+     * Method Name: time
+     * Purpose: Prompts the user for a time string matching a specific pattern and converts it to java.time.LocalTime.
+     * Pre-conditions: Pattern must be a valid DateTimeFormatter pattern.
+     * Post-conditions: Input is consumed. Loops on DateTimeParseException. Throws ExitFormError if "exit" is typed.
+     * Return Value: LocalTime - The parsed LocalTime object.
+     * Parameters:
+     *     label (in)   - Description of the time.
+     *     pattern (in) - The format pattern (e.g., "HH:mm:ss").
      */
     public static LocalTime time(String label, String pattern) {
         var format = DateTimeFormatter.ofPattern(pattern);
@@ -228,6 +276,16 @@ public class Prompt {
         }
     }
 
+    /*
+     * Method Name: bool
+     * Purpose: Prompts the user for a yes/no response and converts it to a Boolean.
+     * Pre-conditions: System.in is available.
+     * Post-conditions: Input is consumed. Loops until "yes", "no", or blank (if default exists) is entered.
+     * Return Value: Boolean - True for "yes", False for "no", or the default value.
+     * Parameters:
+     *     label (in)   - Description of the boolean toggle.
+     *     current (in) - Default Boolean value.
+     */
     public static Boolean bool(String label, Boolean current) {
         while (true) {
             System.out.printf("%s (yes/no)%s: ",
