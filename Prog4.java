@@ -75,7 +75,7 @@ public class Prog4 {
                         new Menu("Update Pet Info", ()->updatePet()),
                         new Menu("Remove A Pet", ()->deletePet()),
                         new Menu("Pet Info").addSubMenu(new Menu[] {
-                            new Menu("View Adoption Applications", ()->{/**TODO: QUERY 1 GOES HERE*/}),
+                            new Menu("View Adoption Applications", ()->viewAdoptionAppsForPet()),
                             new Menu("Health Info", ()->{/**TODO: */}),
                         }),
                     }),
@@ -392,6 +392,29 @@ public class Prog4 {
         }
     }
 
+    public static void viewAdoptionAppsForPet() {
+        try {
+            var id = Prompt.integer("ID of Pet you want to view applications for", null);
+            var rs = DB.executeQuery("SELECT 1 FROM Pet WHERE petId = ?", id);
+            if (!rs.next())
+                throw new SQLException("Pet not found.");
+
+            DB.printQuery("""
+                    SELECT  a.appId as "ID",
+                            m.name as "Name",
+                            a.appDate as "Application Date",
+                            a.status as "Status",
+                            s.name as "Adoption Coordinator"
+                    FROM AdoptionApp a
+                    JOIN Member m ON (a.memberNum = m.memberNum)
+                    JOIN STAFF s  ON (a.empId = s.empId)
+                    WHERE a.petId = ?
+                    """,
+                    id);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
     public static void listPets() {
         try {
             DB.printQuery("""
