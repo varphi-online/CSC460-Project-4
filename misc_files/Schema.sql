@@ -32,7 +32,7 @@ CREATE TABLE PetNeed (
     need VARCHAR2(255),
     petId INTEGER,
 
-    PRIMARY KEY (need, petID),
+    PRIMARY KEY (need),
     FOREIGN KEY (petId) REFERENCES Pet(petId) ON DELETE CASCADE
 );
 
@@ -101,7 +101,7 @@ CREATE TABLE EmergencyContact (
     tele_num VARCHAR2(20),
     email VARCHAR2(255),
 
-    PRIMARY KEY (contactId, memberNum),
+    PRIMARY KEY (contactId),
     FOREIGN KEY (memberNum) REFERENCES Member(memberNum) ON DELETE CASCADE
 );
 
