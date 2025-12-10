@@ -71,9 +71,9 @@ public class Prog4 {
                         new Menu("Business Analytics", ()->{/**TODO: QUERY 4 (Custom Query)*/})
                     }),
                     new Menu("Pets").addSubMenu(new Menu[] {
-                        new Menu("Add New Pet", ()->{addPet();/**TODO: Req 2 (Insert)*/}),
-                        new Menu("Update Pet Info", ()->{/**TODO: Req 2 (Update)*/}),
-                        new Menu("Remove A Pet", ()->{/**TODO: Req 2 (Delete - conditional)*/}),
+                        new Menu("Add New Pet", ()->addPet()),
+                        new Menu("Update Pet Info", ()->updatePet()),
+                        new Menu("Remove A Pet", ()->deletePet()),
                         new Menu("Pet Info").addSubMenu(new Menu[] {
                             new Menu("View Adoption Applications", ()->{/**TODO: QUERY 1 GOES HERE*/}),
                             new Menu("Health Info", ()->{/**TODO: */}),
@@ -350,7 +350,48 @@ public class Prog4 {
             ProgramContext.genericError(e);
         }
     }
+
+    public static void updatePet() {
+        try {
+            var id = Prompt.integer("ID of pet you wish to edit", null);
+            var rs = DB.executeQuery("SELECT animalType, breed, age, doa, adoptable, name FROM Pet WHERE petId = ?", id);
+
+            if (!rs.next())
+                throw new SQLException("Pet data not found.");
+
+            System.out.println("Press Enter to keep existing info.");
+            DB.executeUpdate("UPDATE Pet SET animalType=?, breed=?, age=?, doa=?, adoptable=?, name=? WHERE petId=?", 
+                    Prompt.string("animalType", rs.getString(1)), 
+                    Prompt.string("Breed", rs.getString(2)),
+                    Prompt.integer("Age", rs.getInt(3)),
+                    Prompt.date("DOA", "MM-dd-YYYY", rs.getDate(4)),
+                    Prompt.bool("Adoptable?", rs.getBoolean(5)),
+                    Prompt.string("Name", rs.getString(6)),
+                    id
+                );
+            ProgramContext.successMessage("Pet information updated!");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
     
+    public static void deletePet() {
+        try {
+            int id = Prompt.integer("ID of Pet you wish to delete", null);
+            var rs = DB.executeQuery("SELECT 1 FROM Pet WHERE petId = ?", id);
+            if (!rs.next())
+                throw new SQLException("Pet not found.");
+
+            Boolean confirmed = Prompt.bool("Are you sure you want to delete this pet with ID %d?\nALL ASSOCIATED RECORDS WILL BE DELETED\n".formatted(id), false);
+            if (confirmed) {
+                DB.executeUpdate("DELETE FROM Pet WHERE petId = ?", id);
+                ProgramContext.successMessage("Deleted Pet with ID %d".formatted(id));
+            }
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
     public static void listPets() {
         try {
             DB.printQuery("""
