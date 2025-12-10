@@ -1,6 +1,4 @@
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 @SuppressWarnings("UseSpecificCatch")
@@ -26,7 +24,15 @@ public class Prog4 {
          */
 
         ui.setInitialMode(
-            new Menu("Home", ()->System.out.println("Welcome to El Jefe Cat Cafe!")).addSubMenu(new Menu[] {
+            new Menu("Home", ()->{
+            System.out.println("Welcome to El Jefe Cat Cafe!");
+            try{var rs = DB.prepared("SELECT TO_CHAR(CURRENT_DATE, 'DY, MON DD, YYYY')"+
+                " || ' @ ' || TO_CHAR(CURRENT_TIMESTAMP, 'HH:MI AM') as d FROM DUAL").executeQuery();
+                rs.next();
+                System.out.println(rs.getString(1));
+            }catch(Exception e){}
+            System.out.println("\nType \"exit\" any time to cancel an action or exit the program.");
+        }).addSubMenu(new Menu[] {
                 new Menu("Customer Registration", ()->registerMember()),
                 new Menu("Our Pets", ()->listPets()), 
                 new Menu("Customer Dashboard", ()->login(false)).addSubMenu(new Menu[] {
@@ -90,9 +96,10 @@ public class Prog4 {
                         new Menu("Finalize Adoption", ()->{/**TODO: Update pet status/archive*/}),
                     }),
                     new Menu("Events Management").addSubMenu(new Menu[] {
-                        new Menu("View All Events", ()->{/**TODO: */}), 
-                        new Menu("Create New Event", ()->{/**TODO: */}),
-                        new Menu("Cancel Event", ()->{/**TODO: */}),
+                        new Menu("View All Events", ()->listAllEvents()), 
+                        new Menu("Create New Event", ()->newEvent()),
+                        new Menu("Cancel Event", ()->cancelEvent()),
+                        new Menu("Delete Event", ()->deleteEvent()),
                     }),
                 })
             })
@@ -435,9 +442,9 @@ public class Prog4 {
         try {
             listReservations();
             var resId = Prompt.integer("Reservation ID to extend: ", null);
-            var newDuration = Prompt.time("New Duration", "HH:mm:ss");
+            var newDuration = Prompt.time("New Duration", "HH:mm");
             DB.executeUpdate(
-                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO SECOND) WHERE reservationId = ? AND memberNum = ?",
+                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO MINUTE) WHERE reservationId = ? AND memberNum = ?",
                     newDuration.toString(), resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation extended successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
@@ -460,7 +467,8 @@ public class Prog4 {
                             s.name as "Coordinator"
                         FROM Event e
                         LEFT JOIN Booking b ON e.eventId = b.eventId
-                        LEFT JOIN Staff s ON s.empId = e.coordinator 
+                        LEFT JOIN Staff s ON s.empId = e.coordinator
+                        WHERE e.canceled = FALSE
                         GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
                         HAVING (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) > 0
                     """);
@@ -475,7 +483,7 @@ public class Prog4 {
                         SELECT e.eventId as "ID",
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
                             e.description,
-                            e.roomId,
+                            e.roomId
                         FROM (Event e
                         JOIN Booking b USING (eventId))
                         WHERE b.member = ? AND b.status NOT IN ('CAN')
@@ -733,6 +741,49 @@ public class Prog4 {
                     INSERT INTO AdoptionApp VALUES (%d, ?, NULL, ?, CURRENT_DATE, 'PEN')
                     """.formatted(appId), ProgramContext.getUserId(), pid);
             ProgramContext.setStatusMessage("Created a new application!", ProgramContext.Color.GREEN);
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void newEvent() {
+        try {
+            System.out.println("-- Rooms -- ");
+            DB.printQuery("SELECT roomId as \"ID\", maxCapacity as\"Max Cap.\" FROM Room");
+            DB.executeUpdate("INSERT INTO Event VALUES(%d,?,?,CAST(? AS INTERVAL HOUR TO MINUTE),?,?,?, FALSE)"
+                .formatted(DB.uniqueId("Event", "eventId")),
+                    ProgramContext.getUserId(),
+                    Prompt.date("Event Date", "MM-dd-yyyy H:m", null),
+                    Prompt.time("Event Duration", "H:m").toString(),
+                    Prompt.integer("Room ID (from above)", null),
+                    Prompt.string("Event Description", null),
+                    Prompt.integer("Max Capacity (Cannot exceed chosen Room's Max capacity)", null)
+                );
+            ProgramContext.successMessage("Created new event!");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void cancelEvent(){
+        try {
+            listAllEvents();
+            var eid = Prompt.integer("Event Id", null);
+            DB.executeUpdate("UPDATE Event SET canceled=TRUE WHERE eventId=?", eid);
+            DB.executeUpdate("UPDATE Booking SET status='CAN' WHERE eventId=?", eid);
+            ProgramContext.successMessage("Successfully canceled event.");
+        } catch (Exception e) {
+            ProgramContext.genericError(e);
+        }
+    }
+
+    public static void deleteEvent(){
+        try {
+            DB.printQuery("""
+                    SELECT eventId as "ID", description as "Name" FROM
+                    Event WHERE canceled=TRUE AND eventDate > (CURRENT_DATE + 14)
+                    """); // "well in advance is 14 days i think"
+            DB.executeUpdate("DELETE FROM Event WHERE eventId=? AND canceled", Prompt.integer("Event ID", null));
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }

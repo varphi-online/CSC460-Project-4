@@ -572,7 +572,8 @@ INSERT INTO Event VALUES (
 	'02:30:00' HOUR TO SECOND,
 	3,
 	'LAST DAY OF SCHOOL!',
-	6
+	6,
+	FALSE
 );
 
 INSERT INTO Event VALUES (
@@ -582,7 +583,8 @@ INSERT INTO Event VALUES (
 	'16:30:00' HOUR TO SECOND,
 	2,
 	'Jamies Birthday!',
-	50
+	50,
+	FALSE
 );
 
 INSERT INTO Event VALUES (
@@ -592,7 +594,8 @@ INSERT INTO Event VALUES (
 	'12:30:00' HOUR TO SECOND,
 	1,
 	'Adoption bonanza',
-	2
+	2,
+	FALSE
 );
 
 INSERT INTO Booking VALUES (

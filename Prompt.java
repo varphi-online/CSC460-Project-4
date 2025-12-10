@@ -1,19 +1,17 @@
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.Duration;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Prompt {
     private static final Scanner scanner = Prog4.getScanner();
-
+    public static final RuntimeException ExitFormError = new RuntimeException("Cancelled.");
     /**
      * get a string from user.
      * If current is blank or null, user MUST give a nonblank input.
@@ -27,8 +25,9 @@ public class Prompt {
     public static String string(String label, String current) {
         while (true) {
             System.out.printf("Enter %s %s: ", label,
-                    current.isBlank() ? "" : "(leave blank for default: " + current + ")");
+                    current == null || current.isBlank() ? "" : "(leave blank for default: " + current + ")");
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             if (input.isBlank()) {
                 if (current == null || current.isBlank()) {
                     System.out.println("Error: Must give a non-blank input.");
@@ -56,8 +55,9 @@ public class Prompt {
                         ? "(leave blank for null)"
                         : "(leave blank for default: " + current + ")");
         var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
         if (input.isBlank()) {
-            return current.isBlank() ? null : current;
+            return current == null || current.isBlank() ? null : current;
         }
         return input;
     }
@@ -113,6 +113,7 @@ public class Prompt {
                             ? ""
                             : " (leave blank for default: " + current + ")");
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             if (input.isBlank() && current != null) {
                 return current;
             }
@@ -139,6 +140,7 @@ public class Prompt {
                             ? " (leave blank for null)"
                             : " (leave blank for default: " + current + ")");
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             if (input.isBlank()) {
                 return current;
             }
@@ -166,6 +168,7 @@ public class Prompt {
                     pattern,
                     current == null ? "" : " (current: " + current + ")");
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             try {
                 return new Date(format.parse(input).getTime());
             } catch (ParseException e) {
@@ -191,6 +194,7 @@ public class Prompt {
                     pattern,
                     current == null ? "" : " (current: " + current + ")");
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             try {
                 return new Timestamp(format.parse(input).getTime());
             } catch (ParseException e) {
@@ -212,6 +216,7 @@ public class Prompt {
         while (true) {
             System.out.printf("Enter %s (format: %s): ", label, pattern);
             var input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) throw ExitFormError;
             try {
                 return LocalTime.parse(input, format);
             } catch (DateTimeParseException e) {

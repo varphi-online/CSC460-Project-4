@@ -207,10 +207,11 @@ CREATE TABLE Event (
     eventId INTEGER,
     coordinator INTEGER, -- TODO: Trigger check coordinator?
     eventDate DATE,
-    eventTime INTERVAL DAY TO MINUTE,
+    eventDuration INTERVAL DAY TO MINUTE,
     roomId INTEGER,
     description VARCHAR2(255),
     maxCapacity INTEGER, -- TODO: TRIGGER TO MAKE SURE EVENT MAX DOES NOT EXCEED ROOM MAX
+    canceled BOOLEAN,
 
     PRIMARY KEY (eventId),
     FOREIGN KEY (coordinator) REFERENCES Staff(empId) ON DELETE SET NULL,
@@ -229,3 +230,25 @@ CREATE TABLE Booking (
     FOREIGN KEY (eventId) REFERENCES Event(eventId) ON DELETE CASCADE,
     FOREIGN KEY (member) REFERENCES Member(memberNum) ON DELETE CASCADE
 );
+
+-- CREATE OR REPLACE TRIGGER CheckBookingCapacity
+-- BEFORE INSERT ON Booking
+-- FOR EACH ROW
+-- DECLARE
+--     maxCap INTEGER;
+--     attendees INTEGER;
+-- BEGIN
+--     SELECT maxCapacity 
+--     INTO maxCap 
+--     FROM Event
+--     WHERE eventId = :NEW.eventId;
+
+--     SELECT COUNT(*) 
+--     INTO attendees 
+--     FROM Booking 
+--     WHERE eventId = :NEW.eventId;
+
+--     IF (attendees + 1) > maxCap THEN
+--         RAISE_APPLICATION_ERROR(-20001, 'Max capacity for event has been met.');
+--     END IF;
+-- END;
