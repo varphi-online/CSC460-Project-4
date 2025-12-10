@@ -3,6 +3,8 @@
 --     PRIMARY KEY (animalType)
 -- );
 
+-- SET SQLBLANKLINES ON;
+
 CREATE TABLE Room(
     roomId INTEGER,
     maxCapacity INTEGER,
@@ -22,7 +24,7 @@ CREATE TABLE Pet (
     breed VARCHAR2(255),
     age INTEGER NOT NULL CHECK (age > -1),
     doa DATE NOT NULL, 
-    adoptable BOOLEAN NOT NULL,
+    adoptable NUMBER(1) DEFAULT 0 NOT NULL,
     name VARCHAR2(255),
 
     PRIMARY KEY (petId)
@@ -49,7 +51,7 @@ CREATE TABLE Area (
     roomId INTEGER,
     animalType VARCHAR2(10),
 
-    designatedAdoptArea BOOLEAN,
+    designatedAdoptArea NUMBER(1) DEFAULT 0 NOT NULL,
 
     PRIMARY KEY (sector, roomId),
     FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
@@ -148,7 +150,7 @@ CREATE TABLE FoodOrder (
     reservationId INTEGER,
     orderTime DATE,
     totalPrice NUMBER(6, 2),
-    paymentStatus BOOLEAN,
+    paymentStatus NUMBER(1) DEFAULT 0 NOT NULL,
 
     PRIMARY KEY (orderId),
     FOREIGN KEY (memberNum) REFERENCES Member(memberNum),
@@ -234,7 +236,7 @@ CREATE TABLE Event (
     roomId INTEGER,
     description VARCHAR2(255),
     maxCapacity INTEGER,
-    canceled BOOLEAN,
+    canceled NUMBER(1) DEFAULT 0 NOT NULL,
 
     PRIMARY KEY (eventId),
     FOREIGN KEY (coordinator) REFERENCES Staff(empId) ON DELETE SET NULL,
@@ -284,8 +286,8 @@ CREATE TABLE Booking (
     eventId INTEGER,
     member INTEGER,
     status VARCHAR2(10) NOT NULL CHECK (status IN ('REG', 'ATT', 'NOS', 'CAN')),
-    paid BOOLEAN,
-    refunded BOOLEAN,
+    paid NUMBER(1) DEFAULT 0 NOT NULL,
+    refunded NUMBER(1) DEFAULT 0 NOT NULL,
 
     PRIMARY KEY (bookingId),
     FOREIGN KEY (eventId) REFERENCES Event(eventId) ON DELETE CASCADE,
