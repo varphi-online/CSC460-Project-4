@@ -321,7 +321,7 @@ public class Prog4 {
                         OR EXISTS (
                             SELECT 1 FROM FoodOrder f 
                             WHERE f.memberNum = m.memberNum 
-                            AND f.paymentStatus = FALSE
+                            AND f.paymentStatus = 0
                         )
                     )
                     """, id)) {
@@ -534,7 +534,7 @@ public class Prog4 {
             stmt.setString(2, Prompt.stringNullable("Breed", null));
             stmt.setInt(3, Prompt.integer("Age", null));
             stmt.setDate(4, Prompt.date("Pet's Date Of Arrival", "MM-dd-yyyy", null));
-            stmt.setBoolean(5, Prompt.bool("adoptable?", null));
+            stmt.setInt(5, Prompt.bool("adoptable?", null) ? 0 : 1);
             stmt.setString(6, Prompt.stringNullable("Name", null));
             stmt.executeUpdate();
             var keys = stmt.getGeneratedKeys();
@@ -581,7 +581,7 @@ public class Prog4 {
                     Prompt.string("Breed", rs.getString(2)),
                     Prompt.integer("Age", rs.getInt(3)),
                     Prompt.date("DOA", "MM-dd-YYYY", rs.getDate(4)),
-                    Prompt.bool("Adoptable?", rs.getBoolean(5)),
+                    Prompt.bool("Adoptable?", rs.getInt(5) == 0 ? Boolean.FALSE : Boolean.TRUE) ? 1 : 0,
                     Prompt.string("Name", rs.getString(6)),
                     id
                 );
@@ -968,7 +968,7 @@ public class Prog4 {
                         SELECT orderId as "Order ID",
                                TO_CHAR(orderTime, 'MM-DD-YYYY HH:MI AM') as "Time",
                                '$' || totalPrice as "Total",
-                               CASE WHEN paymentStatus THEN 'PAID' ELSE 'UNPAID' END as "Status"
+                               CASE WHEN paymentStatus=1 THEN 'PAID' ELSE 'UNPAID' END as "Status"
                         FROM FoodOrder
                         WHERE memberNum = ?
                         ORDER BY orderTime DESC
@@ -1219,7 +1219,7 @@ public class Prog4 {
                     SELECT p.petId as "ID", animalType as "Type", p.name as "Name", p.breed as "Breed",
                            p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "Birthday"
                     FROM Pet p LEFT OUTER JOIN AdoptionApp a on (p.petId = a.petId AND a.status NOT IN ('PEN', 'APP'))
-                    WHERE p.adoptable
+                    WHERE p.adoptable=1
                     ORDER BY p.animalType ASC, p.name ASC
             """);
             var pid = Prompt.integer("Pet ID you wish to adopt", null);
@@ -1283,7 +1283,7 @@ public class Prog4 {
         try {
             listAllEvents();
             var eid = Prompt.integer("Event Id", null);
-            DB.executeUpdate("UPDATE Event SET canceled=TRUE WHERE eventId=?", eid);
+            DB.executeUpdate("UPDATE Event SET canceled=1 WHERE eventId=?", eid);
             DB.executeUpdate("UPDATE Booking SET status='CAN' WHERE eventId=?", eid);
             ProgramContext.successMessage("Successfully canceled event.");
         } catch (Exception e) {
@@ -1304,9 +1304,9 @@ public class Prog4 {
         try {
             DB.printQuery("""
                     SELECT eventId as "ID", description as "Name" FROM
-                    Event WHERE canceled=TRUE AND eventDate > (CURRENT_DATE + 14)
+                    Event WHERE canceled=1 AND eventDate > (CURRENT_DATE + 14)
                     """); // "well in advance is 14 days i think"
-            DB.executeUpdate("DELETE FROM Event WHERE eventId=? AND canceled", Prompt.integer("Event ID", null));
+            DB.executeUpdate("DELETE FROM Event WHERE eventId=? AND canceled=1", Prompt.integer("Event ID", null));
         } catch (Exception e) {
             ProgramContext.genericError(e);
         }
