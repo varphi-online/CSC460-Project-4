@@ -43,7 +43,42 @@ public class DB {
      *      args (in) - Command line arguments (currently unused in this specific implementation).
      */
     public static void init(String[] args) {
-
+        final String oracleURL = // Magic lectura -> aloe access spell
+                "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
+        String username = null, // Oracle DBMS username
+                password = null; // Oracle DBMS password
+        if (args.length == 2) { // get username/password from cmd line args
+            username = args[0];
+            password = args[1];
+        } else {
+            System.out.println("\nUsage:  java JDBC <username> <password>\n"
+                    + "    where <username> is your Oracle DBMS"
+                    + " username,\n    and <password> is your Oracle"
+                    + " password (not your system password).\n");
+            System.exit(-1);
+        }
+        // load the (Oracle) JDBC driver by initializing its base
+        // class, 'oracle.jdbc.OracleDriver'.
+        try {
+            Class.forName("oracle.jdbc.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("*** ClassNotFoundException:  "
+                    + "Error loading Oracle JDBC driver.  \n"
+                    + "\tPerhaps the driver is not on the Classpath?");
+            System.exit(-1);
+        }
+        Connection d = null;
+        try {
+            db = DriverManager.getConnection(oracleURL, username, password);
+        } catch (SQLException e) {
+            System.err.println("*** SQLException:  "
+                    + "Could not open JDBC connection.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+        }
+/*
         final String oracleURL = "jdbc:h2:./my_local_db;MODE=Oracle";
         String username = "sa",
                 password = "";
@@ -70,7 +105,7 @@ public class DB {
             System.err.println("\tSQLState:  " + e.getSQLState());
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
-        }
+        }*/
     }
 
     /*

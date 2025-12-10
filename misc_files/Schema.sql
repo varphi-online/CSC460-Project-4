@@ -3,7 +3,7 @@
 --     PRIMARY KEY (animalType)
 -- );
 
--- SET SQLBLANKLINES ON;
+SET SQLBLANKLINES ON;
 
 CREATE TABLE Room(
     roomId INTEGER,
@@ -121,29 +121,29 @@ CREATE TABLE Reservation (
     FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
--- CREATE OR REPLACE TRIGGER CheckReservationCheckIn
--- BEFORE INSERT OR UPDATE OF checkedIn ON Reservation
--- FOR EACH ROW
--- DECLARE
---     end_time DATE;
--- BEGIN
---     IF :NEW.checkedIn = 'YES' THEN
---         end_time := :NEW.reservationDate + :NEW.timeSlot;
---         IF SYSDATE < :NEW.reservationDate THEN
---             RAISE_APPLICATION_ERROR(
---                 -20002, 
---                 'Check-in failed: It is too early for this reservation.'
---             );
---         END IF;
---         IF SYSDATE > end_time THEN
---             RAISE_APPLICATION_ERROR(
---                 -20003, 
---                 'Check-in failed: The time slot for this reservation has passed.'
---             );
---         END IF;   
---     END IF;
--- END;
--- /
+CREATE OR REPLACE TRIGGER CheckReservationCheckIn
+BEFORE INSERT OR UPDATE OF checkedIn ON Reservation
+FOR EACH ROW
+DECLARE
+    end_time DATE;
+BEGIN
+    IF :NEW.checkedIn = 'YES' THEN
+        end_time := :NEW.reservationDate + :NEW.timeSlot;
+        IF SYSDATE < :NEW.reservationDate THEN
+            RAISE_APPLICATION_ERROR(
+                -20002, 
+                'Check-in failed: It is too early for this reservation.'
+            );
+        END IF;
+        IF SYSDATE > end_time THEN
+            RAISE_APPLICATION_ERROR(
+                -20003, 
+                'Check-in failed: The time slot for this reservation has passed.'
+            );
+        END IF;   
+    END IF;
+END;
+/
 
 CREATE TABLE FoodOrder (
     orderId INTEGER,
@@ -244,44 +244,45 @@ CREATE TABLE Event (
     FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE
 );
 
--- CREATE OR REPLACE TRIGGER CheckEventCoordinator
--- BEFORE INSERT ON Event FOR EACH ROW
--- DECLARE
---   v_count INTEGER;
--- BEGIN
---   SELECT COUNT(*)
---     INTO v_count
---     FROM Staff
---    WHERE Staff.empId = :NEW.coordinator
---      AND Staff.empType = 'CRD';
+CREATE OR REPLACE TRIGGER CheckEventCoordinator
+BEFORE INSERT ON Event FOR EACH ROW
+DECLARE
+  v_count INTEGER;
+BEGIN
+  SELECT COUNT(*)
+    INTO v_count
+    FROM Staff
+   WHERE Staff.empId = :NEW.coordinator
+     AND Staff.empType = 'CRD';
 
---   IF v_count = 0 THEN
---     RAISE_APPLICATION_ERROR(
---       -20001,
---       'Coordinator for event must be a coordinator employee.'
---     );
---   END IF;
--- END;
+  IF v_count = 0 THEN
+    RAISE_APPLICATION_ERROR(
+      -20001,
+      'Coordinator for event must be a coordinator employee.'
+    );
+  END IF;
+END;
+/
 
--- CREATE OR REPLACE TRIGGER CheckEventCapacity
--- BEFORE INSERT OR UPDATE OF roomId, maxCapacity
--- ON Event FOR EACH ROW
--- DECLARE
---   rm_cap INTEGER;
--- BEGIN
---   SELECT Room.maxCapacity
---     INTO rm_cap
---     FROM Room
---    WHERE Room.roomId = :NEW.roomId;
+CREATE OR REPLACE TRIGGER CheckEventCapacity
+BEFORE INSERT OR UPDATE OF roomId, maxCapacity
+ON Event FOR EACH ROW
+DECLARE
+  rm_cap INTEGER;
+BEGIN
+  SELECT Room.maxCapacity
+    INTO rm_cap
+    FROM Room
+   WHERE Room.roomId = :NEW.roomId;
 
---   IF :NEW.maxCapacity > rm_cap THEN
---     RAISE_APPLICATION_ERROR(
---       -20001,
---       'Event capacity exceeds selected Room'
---     );
---   END IF;
--- END;
--- /
+  IF :NEW.maxCapacity > rm_cap THEN
+    RAISE_APPLICATION_ERROR(
+      -20001,
+      'Event capacity exceeds selected Room'
+    );
+  END IF;
+END;
+/
 
 CREATE TABLE Booking (
     bookingId INTEGER,
@@ -296,25 +297,25 @@ CREATE TABLE Booking (
     FOREIGN KEY (member) REFERENCES Member(memberNum) ON DELETE CASCADE
 );
 
--- CREATE OR REPLACE TRIGGER CheckBookingCapacity
--- BEFORE INSERT ON Booking
--- FOR EACH ROW
--- DECLARE
---     maxCap INTEGER;
---     attendees INTEGER;
--- BEGIN
---     SELECT maxCapacity 
---     INTO maxCap 
---     FROM Event
---     WHERE eventId = :NEW.eventId;
+CREATE OR REPLACE TRIGGER CheckBookingCapacity
+BEFORE INSERT ON Booking
+FOR EACH ROW
+DECLARE
+    maxCap INTEGER;
+    attendees INTEGER;
+BEGIN
+    SELECT maxCapacity 
+    INTO maxCap 
+    FROM Event
+    WHERE eventId = :NEW.eventId;
 
---     SELECT COUNT(*) 
---     INTO attendees 
---     FROM Booking 
---     WHERE eventId = :NEW.eventId;
+    SELECT COUNT(*) 
+    INTO attendees 
+    FROM Booking 
+    WHERE eventId = :NEW.eventId;
 
---     IF (attendees + 1) > maxCap THEN
---         RAISE_APPLICATION_ERROR(-20001, 'Max capacity for event has been met.');
---     END IF;
--- END;
--- /
+    IF (attendees + 1) > maxCap THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Max capacity for event has been met.');
+    END IF;
+END;
+/

@@ -1,11 +1,19 @@
 # CSC460 Final Project
 
-Run `./run.sh` to compile and execute the program. It may ask for your oracle username and password.
+TAs:
+To run the program, you need to seed the DB by connecting to aloe from the misc_files folder. Then run `@ Schema.sql`, then `@ seed.sql`.
+Once finished seeding, add the nessecary classpath with:
 
+`export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${CLASSPATH}`
 
-## Development
+and run `javac *.java && java Prog4 <username> <password>` to start the program
 
-There is a makefile included, as well as the H2 JAR for local DB emulation. You may need to run `./install.sh` to seed the DB.
+# Contributions:
+Aidan Fuhrmann: Created menu system and project structure, implemented all Member callbacks and some Staff callbacks, transferred project to lectura from local development.
+
+Aidan DiNunzio: Maintained the database diagram throughout the project, populated relations with sample data, and created the design PDF.
+
+Jesse Oved: Made adjustments to database schema, designed API to prompt users for different kinds of input, implemented some of the program's CRUD functionality, designed the custom query.
 
 # E-R Diagram
 ![E-R Diagram](misc_files/Final_ER.png)

@@ -229,7 +229,7 @@ public class Prog4 {
                              WHERE mh.memberNum = r.memberNum
                                AND r.reservationDate >= mh.startDate
                                AND (mh.endDate IS NULL OR r.reservationDate <= mh.endDate)
-                             FETCH FIRST 1 ROWS ONLY),
+							   AND ROWNUM=1),
                             'UNKNOWN') as "Tier Status"
 
                     FROM Reservation r
@@ -354,9 +354,8 @@ public class Prog4 {
      */
     public static void registerMember() {
         try {
-            var rs = DB.execute("SELECT count(*) FROM Member");
-            rs.next();
-            var stmt = DB.prepared("INSERT INTO Member VALUES ( member_seq.NEXTVAL, ?, ?, ?, ?, ? )", true);
+			var id = DB.uniqueId("Member", "memberNum");
+            var stmt = DB.prepared("INSERT INTO Member VALUES ( %d, ?, ?, ?, ?, ? )".formatted(id), true);
             stmt.setString(1, Prompt.string("Name", ""));
             stmt.setString(2, Prompt.string("Phone", ""));
             stmt.setString(3, Prompt.string("Email", ""));
@@ -366,18 +365,9 @@ public class Prog4 {
                 inp = "NOT CURRENTLY MEMBER";
             }
             inp = inp.toUpperCase();
-            // if (inp != null && !inp.matches("(BRONZE)|(SILVER)|(GOLD)"))
-            //     throw new RuntimeException("Selected tier does not exist.");
             stmt.setString(5, inp);
             stmt.executeUpdate();
-            var keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                int id = keys.getInt(1);
-                DB.executeUpdate(" INSERT INTO MemberHistory VALUES (?,  CURRENT_DATE, NULL, ?) ", id, inp);
-                ProgramContext.successMessage("Successfully registered user with ID: %d!".formatted(id));
-            } else {
-                ProgramContext.failureMessage("Failed to retrieve Member ID!");
-            }
+			ProgramContext.successMessage("Successfully registered user with ID: %d!".formatted(id));
 
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -530,7 +520,8 @@ public class Prog4 {
      */
     public static void addPet() {
         try {
-            var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(DB.uniqueId("Pet", "petId")), true);
+			var id = DB.uniqueId("Pet", "petId");
+            var stmt = DB.prepared("INSERT INTO Pet VALUES (%d, ?, ?, ?, ?, ?, ? )".formatted(id), true);
             stmt.setString(1, Prompt.string("Animal Type", ""));
             stmt.setString(2, Prompt.stringNullable("Breed", null));
             stmt.setInt(3, Prompt.integer("Age", null));
@@ -538,15 +529,9 @@ public class Prog4 {
             stmt.setInt(5, Prompt.bool("adoptable?", null) ? 0 : 1);
             stmt.setString(6, Prompt.stringNullable("Name", null));
             stmt.executeUpdate();
-            var keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                int id = keys.getInt(1);
-                System.out.println("Added the following pet entry to databse:");
-                printPetInfo(id);
-                ProgramContext.successMessage("Added Pet with ID: %d!".formatted(id));
-            } else {
-                ProgramContext.failureMessage("Failed to retrieve Pet ID!");
-            }
+			System.out.println("Added the following pet entry to databse:");
+            printPetInfo(id);
+            ProgramContext.successMessage("Added Pet with ID: %d!".formatted(id));
         } catch (SQLException e) {
             ProgramContext.genericError(e);
         }
@@ -602,13 +587,24 @@ public class Prog4 {
      */
     public static void deletePet() {
         try {
-            listPets();
+            DB.printQuery("""
+                    SELECT petId as "ID", animalType as "Type", p.name as "Name", p.breed as "Breed",
+                           p.age as "Age", TO_CHAR(p.doa, 'MON DD') as "DOA", p.adoptable as "Adoptable"
+                    FROM Pet p LEFT OUTER JOIN AdoptionApp a USING (petId) INNER JOIN Adoption USING (appId)
+                    ORDER BY p.animalType ASC, p.name ASC
+                    """);
             int id = validateID(
                     Prompt.integer("ID of Pet you wish to delete", null),
                     "Pet",
                     "petId");
             System.out.println("Pet Info:");
             printPetInfo(id);
+			if(!DB.exists("""
+					SELECT 1 FROM
+						Pet p LEFT OUTER JOIN AdoptionApp a USING (petId)
+						INNER JOIN Adoption d USING (appId)
+					WHERE petId=?
+					""",id)) throw new RuntimeException("Pet with chosen ID has not been adopted, and cannot be deleted");
             Boolean confirmed = Prompt.bool("Are you sure you want to delete this pet with ID %d?\nALL ASSOCIATED RECORDS WILL BE DELETED\n".formatted(id), false);
             if (confirmed) {
                 DB.executeUpdate("DELETE FROM Pet WHERE petId = ?", id);
@@ -758,12 +754,12 @@ public class Prog4 {
      */
     public static void bookReservation() {
         try {
-            String resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null).toString();
+            var resDate = Prompt.timestamp("Reservation Date", "MM-dd-yyyy HH:mm", null);
             String timeSlot = Prompt.time("Time Slot Duration", "HH:mm").toString();
             var rs = DB.execute("SELECT count(*) FROM Reservation");
             rs.next();
             int resId = DB.uniqueId("Reservation", "reservationId");
-            DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, CAST(? AS INTERVAL HOUR TO MINUTE), ?, ?)",
+            DB.executeUpdate("INSERT INTO Reservation VALUES (?, ?, ?, ?, TO_DSINTERVAL('0 ' || ? || ':00'), ?, ?)",
                     resId,
                     ProgramContext.getUserId(),
                     Prompt.integer("Room ID", null),
@@ -832,7 +828,7 @@ public class Prog4 {
             var resId = Prompt.integer("Reservation ID to extend: ", null);
             var newDuration = Prompt.time("New Duration", "HH:mm");
             DB.executeUpdate(
-                    "UPDATE Reservation SET timeSlot = CAST(? AS INTERVAL HOUR TO MINUTE) WHERE reservationId = ? AND memberNum = ?",
+                    "UPDATE Reservation SET timeSlot = TO_DSINTERVAL('0 ' || ? || ':00') WHERE reservationId = ? AND memberNum = ?",
                     newDuration.toString(), resId, ProgramContext.getUserId());
             ProgramContext.setStatusMessage("Reservation extended successfully!", ProgramContext.Color.GREEN);
         } catch (Exception e) {
@@ -851,21 +847,21 @@ public class Prog4 {
     public static void listAllEvents() {
         try {
             DB.printQuery("""
-                        SELECT 
+						SELECT 
                             e.eventId as "ID",
                             e.description as "Name",
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
                             e.roomId as "Room #",
-                            COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END) as "Attendees",
+                            COUNT(CASE WHEN b.status != 'CAN' THEN b.bookingId END) as "Attendees",
                             e.maxCapacity as "Max Cap.",
-                            (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) as "Spots Left",
+                            (e.maxCapacity - COUNT(CASE WHEN b.status != 'CAN' THEN b.bookingId END)) as "Spots Left",
                             s.name as "Coordinator"
                         FROM Event e
                         LEFT JOIN Booking b ON e.eventId = b.eventId
                         LEFT JOIN Staff s ON s.empId = e.coordinator
-                        WHERE e.canceled = FALSE
-                        GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
-                        HAVING (e.maxCapacity - COUNT(CASE WHEN b.status = 'CAN' THEN b.bookingId END)) > 0
+                        WHERE e.canceled = 0
+                        GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity, s.name
+                        HAVING (e.maxCapacity - COUNT(CASE WHEN b.status != 'CAN' THEN b.bookingId END)) > 0
                     """);
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -883,14 +879,16 @@ public class Prog4 {
     public static void listMyEvents() {
         try {
             DB.printQuery("""
-                        SELECT e.eventId as "ID",
+						SELECT 
+                            b.bookingId as "Booking ID",
+                            e.eventId as "Event ID",
                             TO_CHAR(e.eventDate, 'DY, MON DD, YYYY HH:MI AM') as "Date/Time",
-                            e.description,
-                            e.roomId
-                        FROM (Event e
-                        JOIN Booking b USING (eventId))
+                            e.description as "Event Name",
+                            e.roomId as "Room"
+                        FROM Event e
+                        JOIN Booking b ON e.eventId = b.eventId
                         WHERE b.member = ? AND b.status NOT IN ('CAN')
-                        GROUP BY e.eventId, e.eventDate, e.description, e.roomId, e.maxCapacity
+                        ORDER BY e.eventDate
                     """, ProgramContext.getUserId());
         } catch (Exception e) {
             ProgramContext.genericError(e);
@@ -1257,7 +1255,7 @@ public class Prog4 {
         try {
             System.out.println("-- Rooms -- ");
             DB.printQuery("SELECT roomId as \"ID\", maxCapacity as\"Max Cap.\" FROM Room");
-            DB.executeUpdate("INSERT INTO Event VALUES(%d,?,?,CAST(? AS INTERVAL HOUR TO MINUTE),?,?,?, FALSE)"
+            DB.executeUpdate("INSERT INTO Event VALUES(%d,?,?,TO_DSINTERVAL('0 ' || ? || ':00'),?,?,?, 0)"
                 .formatted(DB.uniqueId("Event", "eventId")),
                     ProgramContext.getUserId(),
                     Prompt.date("Event Date", "MM-dd-yyyy H:m", null),
@@ -1383,7 +1381,7 @@ public class Prog4 {
     public static void finalizeAdoptApp(){
         try {
             DB.printQuery("""
-                SELECT a.appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
+                SELECT appId as "ID", m.name as "Member Name", COALESCE(e.name, 'None') as "Coordinator",
                 p.name as "Pet Name", TO_CHAR(a.appDate, 'MM-dd-yyyy') as "App Date"
                 FROM AdoptionApp a LEFT OUTER JOIN Member m USING (memberNum)
                 LEFT OUTER JOIN Staff e USING (empId)
@@ -1473,10 +1471,10 @@ public class Prog4 {
             ORDER BY r.recId ASC""");
             var recNum = Prompt.integer("Record ID", null);
             var rs = DB.executeQuery("""
-            SELECT r.revNum, r.petId, r.description, r.nextDue, r.status
+            SELECT * FROM ( SELECT r.revNum, r.petId, r.description, r.nextDue, r.status
             FROM HealthRecord r 
             WHERE r.recId = ? 
-            ORDER BY r.revNum DESC FETCH FIRST 1 ROWS ONLY""", recNum);
+            ORDER BY r.revNum DESC) WHERE ROWNUM = 1""", recNum);
             if(rs.next()){
                 DB.executeUpdate("INSERT INTO HealthRecord VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     recNum,

@@ -1,0 +1,20 @@
+SQL> SELECT 'DROP TABLE "' || table_name || '" CASCADE CONSTRAINTS PURGE;'
+  2  FROM user_tables;
+DROP TABLE "ADOPTION" CASCADE CONSTRAINTS PURGE;                                
+DROP TABLE "ADOPTIONAPP" CASCADE CONSTRAINTS PURGE;                             
+DROP TABLE "AREA" CASCADE CONSTRAINTS PURGE;                                    
+DROP TABLE "EMERGENCYCONTACT" CASCADE CONSTRAINTS PURGE;                        
+DROP TABLE "FOODORDER" CASCADE CONSTRAINTS PURGE;                               
+DROP TABLE "HEALTHRECORD" CASCADE CONSTRAINTS PURGE;                            
+DROP TABLE "ITEM" CASCADE CONSTRAINTS PURGE;                                    
+DROP TABLE "MEMBER" CASCADE CONSTRAINTS PURGE;                                  
+DROP TABLE "MEMBERHISTORY" CASCADE CONSTRAINTS PURGE;                           
+DROP TABLE "ORDERITEM" CASCADE CONSTRAINTS PURGE;                               
+DROP TABLE "PET" CASCADE CONSTRAINTS PURGE;                                     
+DROP TABLE "PETNEED" CASCADE CONSTRAINTS PURGE;                                 
+DROP TABLE "PETROOMHISTORY" CASCADE CONSTRAINTS PURGE;                          
+DROP TABLE "PETTEMPERMENT" CASCADE CONSTRAINTS PURGE;                           
+DROP TABLE "RESERVATION" CASCADE CONSTRAINTS PURGE;                             
+DROP TABLE "ROOM" CASCADE CONSTRAINTS PURGE;                                    
+DROP TABLE "STAFF" CASCADE CONSTRAINTS PURGE;                                   
+SQL> SPOOL OFF
