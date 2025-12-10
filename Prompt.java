@@ -167,6 +167,9 @@ public class Prompt {
                     current == null ? "" : " (current: " + current + ")");
             var input = scanner.nextLine().trim();
             try {
+                if (input.isBlank() && current != null) {
+                    return current;
+                }
                 return new Date(format.parse(input).getTime());
             } catch (ParseException e) {
                 System.out.println("Error: Invalid format.");
@@ -226,7 +229,7 @@ public class Prompt {
                     label,
                     current == null
                             ? ""
-                            : " (current: " + current + ")");
+                            : " (current: " + (current ? "yes" : "no") + ")");
             var input = scanner.nextLine().trim().toLowerCase();
             if (input.isEmpty() && current != null)
                 return current;
