@@ -143,11 +143,11 @@ public class DB {
     }
 
     public static void printQuery(String sql, Object... params) throws SQLException {
-    var stmt = DB.prepared(sql);
-    for (int i = 0; i < params.length; i++) {
-        stmt.setObject(i + 1, params[i]);
-    }
-    System.out.println(DB.tabularize(stmt.executeQuery()));
+        var stmt = DB.prepared(sql);
+        for (int i = 0; i < params.length; i++) {
+            stmt.setObject(i + 1, params[i]);
+        }
+        System.out.println(DB.tabularize(stmt.executeQuery()));
     }
 
     public static Integer uniqueId(String tableName, String columnName) throws SQLException {
@@ -166,7 +166,7 @@ public class DB {
         }
     }
 
- public static String tabularize(ResultSet rs) {
+ public static String tabularize(ResultSet rs) throws SQLException {
      StringBuilder sb = new StringBuilder();
      
      try {
@@ -237,9 +237,9 @@ public class DB {
             }
 
         } catch (SQLException e) {
-            // Assuming ProgramContext is defined elsewhere in your project
-            ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
-            return null;
+            // I think we should let the error propagate since it can indicate whether there were no entries
+            throw e;
+            // ProgramContext.setStatusMessage("An error occurred: " + e.getMessage(), ProgramContext.Color.RED);
         }
 
         return sb.toString();
