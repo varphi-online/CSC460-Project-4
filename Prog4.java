@@ -1016,7 +1016,7 @@ public class Prog4 {
     public static void newHealthEntry(){
         try {
             listPets();
-            DB.executeUpdate("INSERT INTO HealthRecord VALUES (%d, 1, NULL, NULL, ?, ?, ?, ?, ?, ?)" //TODO: trigger overrites null
+            DB.executeUpdate("INSERT INTO HealthRecord VALUES (%d, 1, 'insert', CURRENT_DATE, ?, ?, ?, ?, ?, ?)"
                 .formatted(DB.uniqueId("HealthRecord", "recId")),
                 Prompt.integer("Pet ID", null),
                 ProgramContext.getUserId(),
